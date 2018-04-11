@@ -1,0 +1,7 @@
+#! /bin/env python3
+
+from pifcore.utils import prettyPrint
+from pifcore.parser import Parser
+
+m = Parser.parse("./tests/simple.pif")
+prettyPrint(m)

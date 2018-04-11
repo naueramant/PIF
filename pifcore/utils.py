@@ -1,6 +1,6 @@
 from termcolor import colored
 
-def prettyPrintGrammar(module, indentlevel=0):
+def prettyPrint(module, indentlevel=0):
     exclude = ["parent", "children", "type"]
     indent = "    "
     
@@ -16,7 +16,7 @@ def prettyPrintGrammar(module, indentlevel=0):
     try:
         if module.children:
             for c in module.children:
-                prettyPrintGrammar(c, indentlevel+1)
+                prettyPrint(c, indentlevel+1)
     except(AttributeError):
         pass
     
