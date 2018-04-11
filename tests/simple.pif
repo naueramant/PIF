@@ -1,0 +1,2 @@
+a { secret } = 2;
+print(a)
