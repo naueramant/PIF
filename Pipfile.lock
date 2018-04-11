@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6f3b5db5795cc010017c9a7eff4fbd793295570dad65fdf9724a5691baf3a501"
+            "sha256": "96cbc3fa07101c488b45921855a5655a158d5f0fb6c32ecf9b88f5a4b29ad2cd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,13 +16,15 @@
         ]
     },
     "default": {
-        "parso": {
+        "e88296c": {
+            "file": "https://github.com/naueramant/parso/archive/v0.1.2.tar.gz"
+        },
+        "termcolor": {
             "hashes": [
-                "sha256:5815f3fe254e5665f3c5d6f54f086c2502035cb631a91341591b5a564203cffb",
-                "sha256:a7bb86fe0844304869d1c08e8bd0e52be931228483025c422917411ab82d628a"
+                "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"
             ],
             "index": "pypi",
-            "version": "==0.1.1"
+            "version": "==1.1.0"
         }
     },
     "develop": {}

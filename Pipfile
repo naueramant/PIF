@@ -4,7 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-parso = "*"
+"e88296c" = {file = "https://github.com/naueramant/parso/archive/v0.1.2.tar.gz"}
+termcolor = "*"
 
 [dev-packages]
 
