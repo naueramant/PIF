@@ -8,7 +8,9 @@ from pifcore.transpiler import Transpiler
 file = sys.argv[1]
 
 ast = Parser().parse(file)
-#prettyPrint(ast)
+
+if len(sys.argv) > 2 and str(sys.argv[2]) == "--ast":
+    prettyPrint(ast)
+    exit()
 
 Transpiler().transpile(file, ast)
-
