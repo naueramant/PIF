@@ -1,7 +1,14 @@
 #! /bin/env python3
+import sys
 
 from pifcore.utils import prettyPrint
 from pifcore.parser import Parser
+from pifcore.transpiler import Transpiler
 
-m = Parser.parse("./tests/simple.pif")
-prettyPrint(m)
+file = sys.argv[1]
+
+ast = Parser().parse(file)
+#prettyPrint(ast)
+
+Transpiler().transpile(file, ast)
+
