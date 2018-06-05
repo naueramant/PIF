@@ -43,7 +43,7 @@ def handleAnalyse(node):
     ln, col = get_node_pos(node)
 
     if t == 'Assign':
-        return checkAssign(n, ln, col)
+        return checkAssign(node, ln, col)
 
     # no handler defined for node, just return it
     return node
