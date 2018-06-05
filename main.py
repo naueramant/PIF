@@ -40,7 +40,7 @@ def handleLabel(node):
 # Used for analysis run
 def handleAnalyse(node):
     t = get_node_type(node)
-    ln, col = get_node_pos(node)
+    ln, col = get_node_pos(node)    
 
     if t == 'Assign':
         return checkAssign(node, ln, col)
@@ -51,7 +51,9 @@ def handleAnalyse(node):
 # Handling functions
 
 def checkAssign(node, ln, col):
-    if get_node_type(node.value.elts[0]) == 'Name':
+    t = get_node_type(node.value.elts[0])
+
+    if t == 'Name':
         name_conf = get_name_confidential_label(node.value.elts[0])
         tuple_conf = get_tuple_confidentiality_label(node.value)
         
@@ -59,6 +61,7 @@ def checkAssign(node, ln, col):
             printb(source[ln-1][col:].replace('\n', ''), ln, col)
 
     return node
+
 
 # Helping functions
 
