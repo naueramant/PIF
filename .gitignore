@@ -5,5 +5,4 @@
 venv
 build/
 dist
-tests/*.py
 *.egg-info
