@@ -98,10 +98,6 @@ def printb(msg, ln, col):
     print(colored('Confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
     exit(-1)
 
-# Handling functions
-
-...
-
 # Main
 main_ast = load_ast(sys.argv[1])
 source = open(sys.argv[1]).readlines()
