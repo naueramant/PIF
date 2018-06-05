@@ -18,24 +18,6 @@ def walk(node, fn):
     else:
         return fn(node)
 
-# Used for analysis run
-def handleAnalyse(node):
-    t = get_node_type(node)
-    ln, col = get_node_pos(node)
-
-    if t == 'Assign':
-        if get_node_type(node.value.elts[0]) == 'Name':
-            name_conf = get_name_confidential_label(node.value.elts[0])
-            tuple_conf = get_tuple_confidentiality_label(node.value)
-            
-            if tuple_conf != name_conf:
-                printb(source[ln-1][col:].replace('\n', ''), ln, col)
-
-        return node
-
-    # no handler defined for node, just return it
-    return node
-
 # Used for labeling run
 def handleLabel(node):
     t = get_node_type(node)
@@ -52,6 +34,29 @@ def handleLabel(node):
         ], None)
 
         node.value = t
+
+    return node
+
+# Used for analysis run
+def handleAnalyse(node):
+    t = get_node_type(node)
+    ln, col = get_node_pos(node)
+
+    if t == 'Assign':
+        return checkAssign(n, ln, col)
+
+    # no handler defined for node, just return it
+    return node
+
+# Handling functions
+
+def checkAssign(node, ln, col):
+    if get_node_type(node.value.elts[0]) == 'Name':
+        name_conf = get_name_confidential_label(node.value.elts[0])
+        tuple_conf = get_tuple_confidentiality_label(node.value)
+        
+        if tuple_conf != name_conf:
+            printb(source[ln-1][col:].replace('\n', ''), ln, col)
 
     return node
 
