@@ -1,0 +1,35 @@
+expr =  
+    | Name(identifier id, expr_context ctx)
+	| Num(object n) -- a number as a PyObject.
+	| Str(string s) -- need to specify raw, unicode, etc?
+    | BoolOp(boolop op, expr* values)
+	| BinOp(expr left, operator op, expr right)
+	| Compare(expr left, cmpop* ops, expr* comparators)
+	| UnaryOp(unaryop op, expr operand)
+	| IfExp(expr test, expr body, expr orelse)
+    | Tuple(expr* elts, expr_context ctx)
+    | List(expr* elts, expr_context ctx) 
+	| Dict(expr* keys, expr* values)
+	| Set(expr* elts)
+   	| Subscript(expr value, slice slice, expr_context ctx)
+
+stmt = 
+	| Expr(expr value)
+	| Assign(expr* targets, expr value)
+    | Print(expr? dest, expr* values, bool nl)
+	| Compare(expr left, cmpop* ops, expr* comparators)
+    | If(expr test, stmt* body, stmt* orelse)
+    | While(expr test, stmt* body, stmt* orelse)
+    | For(expr target, expr iter, stmt* body, stmt* orelse)
+	| Pass 
+	| Break 
+	| Continue
+
+
+boolop = And | Or 
+
+operator = Add | Sub | Mult | Div | Mod | Pow
+
+unaryop = Invert | Not | UAdd | USub
+
+cmpop = Eq | NotEq | Lt | LtE | Gt | GtE | Is | IsNot | In | NotIn
