@@ -13,12 +13,12 @@ print("--------------------")
 for test in tests:
     test_path = './tests/' + test
     exit_code = call(['python', 'main.py', test_path], stdout=open(devnull, "w"))
-    if test.endswith('_succ.py'):
+    if test.endswith('_succ.pif'):
         if exit_code == 0:
             succesfull_tests.append(test)
         else:
             failed_tests.append(test)
-    elif test.endswith('_fail.py'):
+    elif test.endswith('_fail.pif'):
         if exit_code != 0:
             succesfull_tests.append(test)
         else:
