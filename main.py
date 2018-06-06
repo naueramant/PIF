@@ -94,9 +94,9 @@ def analyseNode(node, pc, label):
         return handleList(node, pc, label, ln, col)
     elif t == 'Tuple':
         return handleTuple(node, pc, label, ln, col) 
-    elif t == 'Dict':
-        return (node, pc, label) # TODO
     elif t == 'Set':
+        return handleSet(node, pc, label, ln, col) 
+    elif t == 'Dict':
         return (node, pc, label) # TODO
     elif t == 'Subscript':
         return (node, pc, label) # TODO
@@ -200,6 +200,9 @@ def handleList(node, pc, label, ln, col):
     return (node, pc, pif_public_label)
 
 def handleTuple(node, pc, label, ln, col):
+    return handleList(node, pc, label, ln, col)
+
+def handleSet(node, pc, label, ln, col):
     return handleList(node, pc, label, ln, col)
 
 # Analysis helping functions
