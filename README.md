@@ -1,6 +1,6 @@
 # Pif - <span style="color:#fff000">P</span>ython + <span style="color:#fff000">i</span>nformation <span style="color:#fff000">f</span>low
 
-PIF is an extension to a subset of the Python language which implements information flow control.
+Pif is an extension to a subset of the Python language which implements information flow control.
 
 ## Setup
 This project requires python3 and uses a `pipenv`. In order to activate it, simply run:
@@ -10,9 +10,9 @@ $ pipenv shell
 ```
 
 ## Usage
-In order to run a PIF file simply pass it to `main.py` like this:
+In order to run a Pif file simply pass it to `main.py` like this:
 ```bash
-$ python main.py ./tests/assign1_succ.py
+$ python main.py ./tests/assign1_succ.pif
 ```
 
 ## Testing
@@ -22,7 +22,7 @@ $ python test.py
 ```
 
 ## Language features
-In PIF the following Python3 features are handled:
+In Pif the following Python3 features are handled:
 * Assignments, `a = 0`
 * Binary operations, `0 and 0`, `0 or 1`, etc.
 * Unary operations, `a = not True`, `b = +1`, `a = -b`, etc.
@@ -30,7 +30,7 @@ In PIF the following Python3 features are handled:
 * If statements, `if b = 2:`, `if a:`, etc.
 * More incoming...
 
-In PIF variables are either `public` or `secret`. The naming of variables is important, as it defines whether a variable is `public` or `secret`. Variable names ending in `_public` are public and variables ending in `_secret` are secret. If they end on anything else, they are public by default. For instance:
+In Pif variables are either `public` or `secret`. The naming of variables is important, as it defines whether a variable is `public` or `secret`. Variable names ending in `_public` are public and variables ending in `_secret` are secret. If they end on anything else, they are public by default. For instance:
 * Private: `a_secret`
 * Public: `b_public`
 * Public: `c`

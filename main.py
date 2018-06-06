@@ -1,7 +1,6 @@
 import astor, ast, sys, os
 from termcolor import colored
 
-
 # Global prefs
 
 pif_secret_label = 1
@@ -11,14 +10,10 @@ pif_public_label = 0
 
 var_labels = {}
 
-# Main functions
-
-def load_ast(file):
-    return astor.code_to_ast.parse_file(file)
-
 #
 # LABELING
 # 
+
 def doLabeling(node):
     if hasattr(node, 'body'):
         [doLabeling(n) for n in node.body]
@@ -31,7 +26,7 @@ def labelNode(node):
     if t == 'Assign':
         label = pif_public_label
         target = node.targets[0]
-        if get_name_confidential(node.targets[0]):
+        if is_name_confidential(node.targets[0]):
             label = pif_secret_label
 
         var_labels[target.id] = label
@@ -39,6 +34,7 @@ def labelNode(node):
 #
 # ANALYSIS
 # 
+
 def doAnalysis(node, pc=None, label=None):
     # default values
     if not pc:
@@ -152,7 +148,10 @@ def handleIf(node, body, orelse, pc, label, ln, col):
 
     return (node, pc, label)
 
-# Helping functions
+def handleWhile(node, pc, label, ln, col):
+    pass
+
+# Analysis helping functions
 
 def is_upper_bound(l1, l2):
     return l1 <= l2
@@ -172,16 +171,13 @@ def get_node_type(node):
 def get_node_pos(node):
     return (node.lineno, node.col_offset)
 
-def get_name_confidential(node):
-    if get_node_type(node) == 'Name':
-        return node.id.endswith('_secret') 
-    else:
-        raise Exception('Can not get confidential of {} node!'.format(get_node_type(node)))
+def is_name_confidential(node : ast.Name):
+    return node.id.endswith('_secret') 
 
-def get_source_at(ln, col):
-    return source[ln-1][col:].replace('\n', '')
+# Other helping functions
 
-# Prints
+def load_ast(file):
+    return astor.code_to_ast.parse_file(file)
 
 def printw(msg, ln, col):
     print(colored('PIF WARNING 😐: ({}, {}):'.format(ln, col), 'yellow'), msg)
@@ -190,19 +186,16 @@ def printb(msg, ln, col):
     print(colored('PIF ERROR 😭 confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
     exit(-1)
 
+def get_source_at(ln, col):
+    return source[ln-1][col:].replace('\n', '')
+
 # Main
-main_ast = load_ast(sys.argv[1])
-source = open(sys.argv[1]).readlines()
 
-doLabeling(main_ast)
+if __name__ == "__main__":
+    main_ast = load_ast(sys.argv[1])
+    source = open(sys.argv[1]).readlines()
 
-# Debug info
-'''
-print("Labels ---------------------------------")
-for k in dict(var_labels):
-    print(k,":", 'secret' if var_labels[k] else 'public')
-'''
+    doLabeling(main_ast) # Generate var -> label map
+    doAnalysis(main_ast) # Do the information flow analysis
 
-doAnalysis(main_ast)
-
-os.system('python3 {}'.format(sys.argv[1]))
+    os.system('python3 {}'.format(sys.argv[1])) # Execute the script
