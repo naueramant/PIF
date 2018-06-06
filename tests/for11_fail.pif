@@ -1,0 +1,7 @@
+content_private = 'b'
+a_public = ['a', content_private]
+c_public = ''
+
+for b_public in a_public:
+    c_public = c_public + b_public
+

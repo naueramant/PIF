@@ -1,0 +1,6 @@
+a_secret = 1
+b_public = 2
+
+if a_secret:
+    if b_public > 1:
+        b_public = 3

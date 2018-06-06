@@ -1,0 +1,4 @@
+a_public = 0
+
+while a_public < 10:
+    a_public = a_public + 1

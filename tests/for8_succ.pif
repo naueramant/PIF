@@ -1,0 +1,6 @@
+a_private = []
+c_private = ''
+
+for b_private in a_private:
+    c_private = c_private + b_private
+

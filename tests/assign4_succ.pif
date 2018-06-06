@@ -1,0 +1,3 @@
+content_public = 'a'
+b_private = ['b', content_public]
+

@@ -1,0 +1,6 @@
+a_private = ['0', '1', '2']
+c_public = ''
+
+for b_public in a_private:
+    c_public = c_public + b_public
+

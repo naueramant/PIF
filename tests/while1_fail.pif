@@ -1,0 +1,7 @@
+a_secret = 0
+b_public = 1
+
+while a_secret < 10:
+    continue
+
+b_public = 2
