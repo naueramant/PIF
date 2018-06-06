@@ -48,7 +48,7 @@ def doAnalysis(node, pc=None, label=None):
         label = pif_public_label
 
     # Walk!
-    if hasattr(node, 'body'):
+    if get_node_type(node) == 'Module':
         [doAnalysis(n, pc, label) for n in node.body]
     else:
         analyseNode(node, pc, label)
@@ -61,9 +61,9 @@ def analyseNode(node, pc, label):
     if t == 'Expr':
         return analyseNode(node.value, pc, label)
     elif t == 'Assign':
-        return handleAssign(node, pc, label, ln, col),
+        return handleAssign(node, pc, label, ln, col)
     elif t == 'If':
-        return (node, pc, label)
+        return handleIf(node, node.body, node.orelse, pc, label, ln, col)
     elif t == 'While':
         return (node, pc, label)
     elif t == 'For':
@@ -79,7 +79,7 @@ def analyseNode(node, pc, label):
     elif t == 'Num':
         return (node, pc, pif_public_label) 
     elif t == 'Str':
-        return (node, pc, label)
+        return (node, pc, pif_public_label)
     elif t == 'BoolOp':
         return handleOp(node, node.values[0], node.values[1], pc, label, ln, col)
     elif t == 'BinOp':
@@ -87,9 +87,9 @@ def analyseNode(node, pc, label):
     elif t == 'Compare':
         return handleCompare(node, pc, label, ln, col)
     elif t == 'UnaryOp':
-        return (node, pc, label) # TODO
+        return analyseNode(node.operand, pc, label)
     elif t == 'IfExp':
-        return (node, pc, label) # TODO
+        return handleIf(node, [node.body], [node.orelse], pc, label, ln, col)
     elif t == 'Tuple':
         return (node, pc, label) # TODO
     elif t == 'List':
@@ -101,46 +101,15 @@ def analyseNode(node, pc, label):
     elif t == 'Subscript':
         return (node, pc, label) # TODO
 
-    '''    
-    # boolop
-    elif t == 'And':
-        return (node, pc, label) 
-    elif t == 'Or': 
-        return (node, pc, label) 
-
-    # operator
-    elif t == 'Add':
-        return (node, pc, label)
-    elif t == 'Sub':
-        return (node, pc, label)
-    elif t == 'Mult':
-        return (node, pc, label)
-    elif t == 'Div':
-        return (node, pc, label)
-    elif t == 'Mod':
-        return (node, pc, label)
-    elif t == 'Pow':
-        return (node, pc, label)
-
-    # unaryop
-    elif t in ['Invert', 'Not', 'UAdd', 'USub']:
-        return (node, pc, label)
-
-    # cmpop
-    elif t in ['Eq', 'NotEq', 'Lt', 'LtE', 'Gt', 'Gte', 'Is', 'IsNot']:
-        return (node, pc, label)
-    elif t in ['In', 'NotIn']:
-        return (node, pc, label)
-    '''
-
     # no handler defined for node, just return it
-    printw('Unsupported code {} 😭'.format(get_source_at(ln, col)), ln, col)
+    printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
     return (node, pc, label)
 
 # Handling functions
 
 def handleAssign(node, pc, label, ln, col):
     current_level = pc[-1]
+
     expr_level = analyseNode(node.value, pc, label)[2]
     target_level = get_variable_label(node.targets[0])
     
@@ -165,6 +134,23 @@ def handleCompare(node, pc, label, ln, col):
     label = get_least_upper_bound(left_label, right_label)
 
     return (node, pc, label) 
+
+def handleIf(node, body, orelse, pc, label, ln, col):
+    guard_level = analyseNode(node.test, pc, label)[2]
+
+    pc.append(guard_level)
+
+    body_labels = [analyseNode(x, pc, label)[2] for x in body]
+    orelse_label = [analyseNode(x, pc, label)[2] for x in orelse]
+
+    body_level = get_least_upper_bound_list(body_labels)
+    orelse_level = get_least_upper_bound_list(orelse_label)
+
+    label = get_least_upper_bound_list([body_level, orelse_level, guard_level])
+
+    pc.pop()
+
+    return (node, pc, label)
 
 # Helping functions
 
@@ -201,7 +187,7 @@ def printw(msg, ln, col):
     print(colored('PIF WARNING 😐: ({}, {}):'.format(ln, col), 'yellow'), msg)
 
 def printb(msg, ln, col):
-    print(colored('PIF ERROR 😭: confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
+    print(colored('PIF ERROR 😭 confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
     exit(-1)
 
 # Main
@@ -211,9 +197,11 @@ source = open(sys.argv[1]).readlines()
 doLabeling(main_ast)
 
 # Debug info
+'''
 print("Labels ---------------------------------")
 for k in dict(var_labels):
     print(k,":", 'secret' if var_labels[k] else 'public')
+'''
 
 doAnalysis(main_ast)
 
