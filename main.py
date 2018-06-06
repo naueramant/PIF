@@ -1,10 +1,15 @@
-import astor, ast, sys
+import astor, ast, sys, os
 from termcolor import colored
+
 
 # Global prefs
 
-pif_secret_label = ast.Str('_pif_secret')
-pif_public_label = ast.Str('_pif_public')
+pif_secret_label = 1
+pif_public_label = 0
+
+# Data
+
+var_labels = {}
 
 # Main functions
 
@@ -16,28 +21,20 @@ def load_ast(file):
 # 
 def doLabeling(node):
     if hasattr(node, 'body'):
-        node.body = [doLabeling(n) for n in node.body]
-        return node
+        [doLabeling(n) for n in node.body]
     else:
-        return labelNode(node)
+        labelNode(node)
 
 def labelNode(node):
     t = get_node_type(node)
-    ln, col = get_node_pos(node)
 
     if t == 'Assign':
-        l = pif_public_label
+        label = pif_public_label
+        target = node.targets[0]
         if get_name_confidential(node.targets[0]):
-            l = pif_secret_label
+            label = pif_secret_label
 
-        t = ast.Tuple([
-            node.value,
-            l
-        ], None)
-
-        node.value = t
-
-    return node
+        var_labels[target.id] = label
 
 #
 # ANALYSIS
@@ -62,57 +59,54 @@ def analyseNode(node, pc, label):
 
     # stmt
     if t == 'Expr':
-        return (node, pc, label)
+        return analyseNode(node.value, pc, label)
     elif t == 'Assign':
-        return (node, pc, label)
-    elif t == 'Compare':
-        return (node, pc, label)
+        return handleAssign(node, pc, label, ln, col),
     elif t == 'If':
         return (node, pc, label)
     elif t == 'While':
         return (node, pc, label)
     elif t == 'For':
         return (node, pc, label)
-    elif t == 'Pass':
-        return (node, pc, label)
-    elif t == 'Break':
-        return (node, pc, label)
-    elif t == 'Continue':
+    elif t in ['Pass', 'Break', 'Continue']:
         return (node, pc, label)
 
     # expr
     elif t == 'Name':
-        return (node, pc, label)
+        return (node, pc, get_variable_label(node)) 
+    elif t == 'NameConstant':
+        return (node, pc, pif_public_label) 
     elif t == 'Num':
-        return (node, pc, label)
+        return (node, pc, pif_public_label) 
     elif t == 'Str':
         return (node, pc, label)
     elif t == 'BoolOp':
-        return (node, pc, label)
+        return handleOp(node, node.values[0], node.values[1], pc, label, ln, col)
     elif t == 'BinOp':
-        return (node, pc, label)
+        return handleOp(node, node.left, node.right, pc, label, ln, col)     
     elif t == 'Compare':
-        return (node, pc, label)
+        return handleCompare(node, pc, label, ln, col)
     elif t == 'UnaryOp':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
     elif t == 'IfExp':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
     elif t == 'Tuple':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
     elif t == 'List':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
     elif t == 'Dict':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
     elif t == 'Set':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
     elif t == 'Subscript':
-        return (node, pc, label)
+        return (node, pc, label) # TODO
 
+    '''    
     # boolop
     elif t == 'And':
-        return (node, pc, label)
-    elif t == 'Or':
-        return (node, pc, label)
+        return (node, pc, label) 
+    elif t == 'Or': 
+        return (node, pc, label) 
 
     # operator
     elif t == 'Add':
@@ -137,6 +131,7 @@ def analyseNode(node, pc, label):
         return (node, pc, label)
     elif t in ['In', 'NotIn']:
         return (node, pc, label)
+    '''
 
     # no handler defined for node, just return it
     printw('Unsupported code {} 😭'.format(get_source_at(ln, col)), ln, col)
@@ -144,7 +139,46 @@ def analyseNode(node, pc, label):
 
 # Handling functions
 
+def handleAssign(node, pc, label, ln, col):
+    current_level = pc[-1]
+    expr_level = analyseNode(node.value, pc, label)[2]
+    target_level = get_variable_label(node.targets[0])
+    
+    if not is_upper_bound(get_least_upper_bound(current_level, expr_level), target_level):
+        printb(get_source_at(ln, col), ln, col)
+    
+    return (node, pc, label)
+
+def handleOp(node, left, right, pc, label, ln, col):
+    left_label = analyseNode(left, pc, label)[2]
+    right_label = analyseNode(right, pc, label)[2]
+    
+    label = get_least_upper_bound(left_label, right_label)
+
+    return (node, pc, label)
+
+def handleCompare(node, pc, label, ln, col):
+    left_label = analyseNode(node.left, pc, label)[2]
+    comp_labels = [analyseNode(x, pc, label)[2] for x in node.comparators]
+
+    right_label = get_least_upper_bound_list(comp_labels)
+    label = get_least_upper_bound(left_label, right_label)
+
+    return (node, pc, label) 
+
 # Helping functions
+
+def is_upper_bound(l1, l2):
+    return l1 <= l2
+
+def get_least_upper_bound_list(l):
+    return 1 if sum(l) else 0 
+
+def get_least_upper_bound(l1, l2):
+    return l1 if l1 > l2 else l2
+
+def get_variable_label(node : ast.Name):
+    return var_labels[node.id]
 
 def get_node_type(node):
     return type(node).__name__
@@ -152,26 +186,11 @@ def get_node_type(node):
 def get_node_pos(node):
     return (node.lineno, node.col_offset)
 
-def get_tuple_confidentiality_label(node):
-    if is_pif_tuple(node):
-        return node.elts[1]
-    else:
-        raise Exception('Can not get conf rating on none tuple!')
-
 def get_name_confidential(node):
     if get_node_type(node) == 'Name':
         return node.id.endswith('_secret') 
     else:
         raise Exception('Can not get confidential of {} node!'.format(get_node_type(node)))
-
-def get_name_confidential_label(node):
-    if get_name_confidential(node):
-        return pif_secret_label
-    else:
-        return pif_public_label
-
-def is_pif_tuple(node):
-    return get_node_type(node) == 'Tuple' and (node.elts[1] == pif_public_label or node.elts[1] == pif_secret_label)
 
 def get_source_at(ln, col):
     return source[ln-1][col:].replace('\n', '')
@@ -179,24 +198,23 @@ def get_source_at(ln, col):
 # Prints
 
 def printw(msg, ln, col):
-    print(colored('WARNING ({}, {}):'.format(ln, col), 'yellow'), msg)
+    print(colored('PIF WARNING 😐: ({}, {}):'.format(ln, col), 'yellow'), msg)
 
 def printb(msg, ln, col):
-    print(colored('Confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
+    print(colored('PIF ERROR 😭: confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
     exit(-1)
 
 # Main
 main_ast = load_ast(sys.argv[1])
 source = open(sys.argv[1]).readlines()
 
-new_ast_label = doLabeling(main_ast)
-doAnalysis(new_ast_label)
-new_source = astor.to_source(new_ast_label)
+doLabeling(main_ast)
 
-print('SOURCE ---------------------------------')
-print(''.join(source))
-print('RESULT ---------------------------------')
-print(new_source)
-print('EXEC -----------------------------------')
+# Debug info
+print("Labels ---------------------------------")
+for k in dict(var_labels):
+    print(k,":", 'secret' if var_labels[k] else 'public')
 
-exec(new_source)
+doAnalysis(main_ast)
+
+os.system('python3 {}'.format(sys.argv[1]))

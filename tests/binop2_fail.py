@@ -1,4 +1,4 @@
-a_secret = True
+a_secret = 1
+b_public = 2
 
-b_public = a_secret and True
-b_public = a_secret or True
+c_public = a_secret + b_public
