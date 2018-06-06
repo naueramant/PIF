@@ -180,7 +180,7 @@ def handleCall(node, pc, label, ln, col):
     args_level = get_least_upper_bound(arg_levels)
 
     # Check if all args are public
-    if func_name in ['print', 'input', 'exit']:
+    if func_name in ['print', 'exit']:
         if args_level != pif_public_label:
             printb(get_source_at(ln, col), ln, col)
         
