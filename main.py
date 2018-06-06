@@ -93,7 +93,7 @@ def analyseNode(node, pc, label):
     elif t == 'List':
         return handleList(node, pc, label, ln, col)
     elif t == 'Tuple':
-        return (node, pc, label) # TODO
+        return handleTuple(node, pc, label, ln, col) 
     elif t == 'Dict':
         return (node, pc, label) # TODO
     elif t == 'Set':
@@ -198,6 +198,9 @@ def handleList(node, pc, label, ln, col):
         printb(get_source_at(ln, col), ln, col) # TODO: explain better
 
     return (node, pc, pif_public_label)
+
+def handleTuple(node, pc, label, ln, col):
+    return handleList(node, pc, label, ln, col)
 
 # Analysis helping functions
 
