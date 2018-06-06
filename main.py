@@ -63,7 +63,7 @@ def analyseNode(node, pc, label):
     elif t == 'While':
         return handleWhile(node, pc, label, ln, col)
     elif t == 'For':
-        return handleFor(node, pc, label, ln, col)
+        return handleFor(node, pc, label, ln, col) # TODO
     elif t == 'Pass':
         return (node, pc, label)
     elif t == 'Break':
@@ -90,9 +90,9 @@ def analyseNode(node, pc, label):
         return analyseNode(node.operand, pc, label)
     elif t == 'IfExp':
         return handleIf(node, [node.body], [node.orelse], pc, label, ln, col)
-    elif t == 'Tuple':
-        return (node, pc, label) # TODO
     elif t == 'List':
+        return handleList(node, pc, label, ln, col)
+    elif t == 'Tuple':
         return (node, pc, label) # TODO
     elif t == 'Dict':
         return (node, pc, label) # TODO
@@ -100,6 +100,8 @@ def analyseNode(node, pc, label):
         return (node, pc, label) # TODO
     elif t == 'Subscript':
         return (node, pc, label) # TODO
+    elif t == 'Call':
+        return handleCall(node, pc, label, ln, col)
 
     # no handler defined for node, just return it
     printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
@@ -172,7 +174,44 @@ def handleWhile(node, pc, label, ln, col):
 def handleFor(node, pc, label, ln, col):
     return (node, pc, label)
 
+def handleCall(node, pc, label, ln, col):
+    func_name = node.func.id
+    arg_levels = [analyseNode(x, pc, label)[2] for x in node.args]
+    args_level = get_least_upper_bound(arg_levels)
+
+    # Check if all args are public
+    if func_name in ['print', 'exit']:
+        if args_level != pif_public_label:
+            printb(get_source_at(ln, col), ln, col)
+    elif func_name == 'len':
+        return(node, pc, analyseNode(args_level)[2])
+    else:
+        printw('Unsupported function "{}"'.format(func_name), ln, col)
+
+    return (node, pc, label)
+
+def handleList(node, pc, label, ln, col):
+    item_levels = [analyseNode(x, pc, label)[2] for x in node.elts]
+    list_label = is_labels_same(item_levels)
+
+    if list_label == None:
+        printb(get_source_at(ln, col), ln, col) # TODO: explain better
+
+    return (node, pc, pif_public_label)
+
 # Analysis helping functions
+
+def is_labels_same(l):
+    if not l:
+        return pif_public_label
+    else:
+        label = l[0]
+
+        for i in l:
+            if i != label:
+                return None
+    
+        return label
 
 def is_upper_bound(l1, l2):
     return l1 <= l2

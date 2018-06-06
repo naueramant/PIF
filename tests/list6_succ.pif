@@ -1,0 +1,4 @@
+a_secret = 1
+b_secret = 2
+c_secret = 3
+d_public = [a_secret, b_secret, c_secret]

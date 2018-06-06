@@ -1,2 +1,0 @@
-content_private = 'a'
-b_public = ['b', content_private]

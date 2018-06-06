@@ -1,0 +1,2 @@
+content_secret = 'a'
+b_public = [content_secret]

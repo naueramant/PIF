@@ -1,0 +1,3 @@
+a_public = "Hej"
+
+print(a_public)
