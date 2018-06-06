@@ -1,0 +1,5 @@
+a_secret = 42
+
+b_public = [a_secret]
+
+c_secret = b_public[0]

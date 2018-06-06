@@ -97,7 +97,7 @@ def analyseNode(node, pc, label):
     elif t == 'Set':
         return handleSet(node, pc, label, ln, col) 
     elif t == 'Dict':
-        return (node, pc, label) # TODO
+        return handleDict(node, pc, label, ln, col) # TODO
     elif t == 'Subscript':
         return (node, pc, label) # TODO
     elif t == 'Call':
@@ -183,12 +183,18 @@ def handleCall(node, pc, label, ln, col):
     if func_name in ['print', 'exit']:
         if args_level != pif_public_label:
             printb(get_source_at(ln, col), ln, col)
-    elif func_name == 'len':
-        return(node, pc, analyseNode(args_level)[2])
+        
+    # result of function is the same as least upper bound of the given args
+    else:
+        return (node, pc, args_level)
+    
+    '''
+    # Warn that other functions are not supported
     else:
         printw('Unsupported function "{}"'.format(func_name), ln, col)
-
+    
     return (node, pc, label)
+    '''
 
 def handleList(node, pc, label, ln, col):
     item_levels = [analyseNode(x, pc, label)[2] for x in node.elts]
@@ -204,6 +210,9 @@ def handleTuple(node, pc, label, ln, col):
 
 def handleSet(node, pc, label, ln, col):
     return handleList(node, pc, label, ln, col)
+
+def handleDict(node, pc, label, ln, col):
+    return (node, pc, label)
 
 # Analysis helping functions
 
