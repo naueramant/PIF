@@ -1,4 +1,4 @@
-# Pif - Python + information flow
+# Pif - <span style="color:#fff000">P</span>ython + <span style="color:#fff000">i</span>nformation <span style="color:#fff000">f</span>low
 
 PIF is an extension to a subset of the Python language which implements information flow control.
 
