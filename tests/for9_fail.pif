@@ -1,6 +1,6 @@
-a_private = []
+a_secret = []
 c_public = ''
 
-for b_public in a_private:
+for b_public in a_secret:
     c_public = c_public + b_public
 
