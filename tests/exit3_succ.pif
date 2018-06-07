@@ -1,3 +1,3 @@
-a_secret = 1
+a_secret = 0
 
 exit(declassify(a_secret))

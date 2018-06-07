@@ -38,7 +38,7 @@ try:
 
     print("---------------------------------------")
 
-    print('{} successfull tests'.format(len(succesfull_tests)))
+    print('{} successful tests'.format(len(succesfull_tests)))
     print('{} failed tests'.format(len(failed_tests)))
     print('{} invalid tests'.format(len(invalid_tests)))
         
