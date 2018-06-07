@@ -1,0 +1,11 @@
+a_secret = 42
+b_public = 0
+
+while b_public < declassify(a_secret):
+    if b_public / 7 == 0:
+        b_public = b_public + 40
+    elif b_public / 10 == 2:
+        b_public = b_public + 40
+    else:
+        b_public = b_public - 1
+    print(b_public)

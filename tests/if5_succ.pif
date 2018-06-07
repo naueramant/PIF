@@ -1,0 +1,5 @@
+a_secret = True
+b_public = 3
+
+if declassify(a_secret):
+    b_public = 2

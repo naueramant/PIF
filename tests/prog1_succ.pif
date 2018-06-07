@@ -1,0 +1,9 @@
+a = 42
+b_secret = 100
+
+c = declassify(b_secret)
+
+for i in list(range(c)):
+    a = a + 1
+
+print(a)

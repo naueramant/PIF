@@ -1,0 +1,7 @@
+a = 42
+b_secret = 100
+
+for i in list(range(b_secret)):
+    a = a + 1
+
+print(a)

@@ -1,0 +1,6 @@
+a_secret = 2
+b_public = 1
+
+if b_public:
+    if declassify(a_secret) > 1:
+        b_public = 3

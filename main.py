@@ -87,7 +87,7 @@ def analyseNode(node, pc, lc, label):
     elif t == 'Assign':
         return handleAssign(node, pc, lc, label, ln, col)
     elif t == 'If':
-        return handleIf(node, node.body, node.orelse, pc, lc, label, ln, col)
+        return handleIf(node, pc, lc, label, ln, col)
     elif t == 'While':
         return handleWhile(node, pc, lc, label, ln, col)
     elif t == 'For':
@@ -107,15 +107,15 @@ def analyseNode(node, pc, lc, label):
     elif t == 'Str':
         return (node, pc, lc, pif_public_label)
     elif t == 'BoolOp':
-        return handleOp(node, node.values[0], node.values[1], pc, lc, label, ln, col)
+        return handleOp(node, pc, lc, label, ln, col)
     elif t == 'BinOp':
-        return handleOp(node, node.left, node.right, pc, lc, label, ln, col)     
+        return handleBinOp(node, pc, lc, label, ln, col)     
     elif t == 'Compare':
         return handleCompare(node, pc, lc, label, ln, col)
     elif t == 'UnaryOp':
         return analyseNode(node.operand, pc, lc, label)
     elif t == 'IfExp':
-        return handleIf(node, [node.body], [node.orelse], pc, lc, label, ln, col)
+        return handleIfExp(node, pc, lc, label, ln, col)
     elif t == 'List':
         return handleList(node, pc, lc, label, ln, col)
     elif t == 'Tuple':
@@ -152,40 +152,66 @@ def handleAssign(node, pc, lc, label, ln, col):
     node.value = node_analysis[0]
     target_level = get_variable_label(node.targets[0])
 
-    
     if not is_upper_bound(get_least_upper_bound(current_level, expr_level), target_level):
         printb(get_source_at(ln, col), ln, col)
     
     return (node, pc, lc, label)
 
-def handleOp(node, left, right, pc, lc, label, ln, col):
-    left_label = analyseNode(left, pc, lc, label)[3]
-    right_label = analyseNode(right, pc, lc, label)[3]
+def handleOp(node, pc, lc, label, ln, col):
+    left = node.values[0]
+    right = node.values[1]
+
+    left_label_analysis = analyseNode(left, pc, lc, label)
+    left_label = left_label_analysis[3]    
+    node.left = left_label_analysis[0]
+
+    right_label_analysis = analyseNode(right, pc, lc, label)
+    right_label = right_label_analysis[3]    
+    node.right = right_label_analysis[0]
+
+    node.values = [node.left, node.right]
     
     label = get_least_upper_bound(left_label, right_label)
 
     return (node, pc, lc, label)
 
+def handleBinOp(node, pc, lc, label, ln, col):
+    node.values = [node.left, node.right]
+    return handleOp(node, pc, lc, label, ln, col)
+
 def handleCompare(node, pc, lc, label, ln, col):
-    left_label = analyseNode(node.left, pc, lc, label)[3]
-    comp_labels = [analyseNode(x, pc, lc, label)[3] for x in node.comparators]
+    left_label_analysis = analyseNode(node.left, pc, lc, label)
+    left_label = left_label_analysis[3]
+    node.left = left_label_analysis[0]
+
+    comp_labels_analysis = [analyseNode(x, pc, lc, label) for x in node.comparators]
+    comp_labels = get_labels(comp_labels_analysis)
+    node.comparators = get_nodes(comp_labels_analysis)
 
     right_label = get_least_upper_bound(comp_labels)
     label = get_least_upper_bound(left_label, right_label)
 
     return (node, pc, lc, label) 
 
-def handleIf(node, body, orelse, pc, lc, label, ln, col):
-    guard_level = analyseNode(node.test, pc, lc, label)[3]
+def handleIf(node, pc, lc, label, ln, col):
+    guard_analysis = analyseNode(node.test, pc, lc, label)
+    guard_level = guard_analysis[3]
+    node.test = guard_analysis[0]
+
     new_pc = get_least_upper_bound(guard_level, pc[-1])
 
     pc.append(new_pc)
 
-    body_labels = [analyseNode(x, pc, lc, label)[3] for x in body]
-    orelse_label = [analyseNode(x, pc, lc, label)[3] for x in orelse]
+    body_labels_analysis = [analyseNode(x, pc, lc, label) for x in node.body]
+    body_labels = get_labels(body_labels_analysis)
+    node.body = get_nodes(body_labels_analysis)
+
+    orelse_label_analysis = [analyseNode(x, pc, lc, label) for x in node.orelse]
+    orelse_labels = get_labels(orelse_label_analysis)
+    node.orelse = get_nodes(orelse_label_analysis)
 
     body_level = get_least_upper_bound(body_labels)
-    orelse_level = get_least_upper_bound(orelse_label)
+    orelse_level = get_least_upper_bound(orelse_labels)
 
     label = get_least_upper_bound([body_level, orelse_level, guard_level])
 
@@ -193,8 +219,21 @@ def handleIf(node, body, orelse, pc, lc, label, ln, col):
 
     return (node, pc, lc, label)
 
+def handleIfExp(node, pc, lc, label, ln, col):
+    node.body = [node.body]
+    node.orelse = [node.orelse]
+    
+    new_node = handleIf(node, pc, lc, label, ln, col)
+
+    node.body = new_node[0].body[0]
+    node.orelse = new_node[0].orelse[0]
+
+    return (node, new_node[1], new_node[2], new_node[3]) 
+
 def handleWhile(node, pc, lc, label, ln, col):
-    guard_level = analyseNode(node.test, pc, lc, label)[3]
+    guard_analysis = analyseNode(node.test, pc, lc, label)
+    guard_level = guard_analysis[3]
+    node.test = guard_analysis[0]
     new_pc = get_least_upper_bound(guard_level, pc[-1])
 
     pc.append(new_pc)
@@ -208,29 +247,49 @@ def handleWhile(node, pc, lc, label, ln, col):
 
     return (node, pc, lc, label)
 
-def handleFor(node, pc, lc, label, ln, col):
-    target_level = analyseNode(node.target, pc, lc, label)[3]
-    if get_node_type(node.iter) == 'Name':
+def handleFor(node, pc, lc, label, ln, col): # TODO: fix analysis
+    target_level_analysis = analyseNode(node.target, pc, lc, label)
+    target_level = target_level_analysis[3]
+    node.target = target_level_analysis[0]
+
+    # -----
+
+    t = get_node_type(node.iter)
+
+    if t == 'Name':
         iter_el_labels = [collection_element_labels[node.iter.id]] 
+    elif t in ['Call', 'Str']: # supported iterables
+        iter_el_labels_analysis = analyseNode(node.iter, pc, lc, label)
+        iter_el_labels = [iter_el_labels_analysis[3]]
+        node.iter = iter_el_labels_analysis[0]
     else:
-        iter_el_labels = [analyseNode(x, pc, lc, label) for x in node.iter.elts]
+        iter_el_labels_analysis = [analyseNode(x, pc, lc, label) for x in node.iter.elts]
+        iter_el_labels = get_labels(iter_el_labels_analysis)
+        node.iter.elts = get_nodes(iter_el_labels_analysis)
     
     iter_el_level = get_least_upper_bound(iter_el_labels)
-    iter_ref_level = analyseNode(node.iter, pc, lc, label)[3]
+    iter_ref_level_analysis = analyseNode(node.iter, pc, lc, label)
+    iter_ref_level = iter_ref_level_analysis[3]
+    node.iter = iter_ref_level_analysis[0]
 
     if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), target_level):
         printb(get_source_at(ln, col), ln, col)
     
     pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
 
-    [analyseNode(x, pc, lc, label)[3] for x in node.body]
-    [analyseNode(x, pc, lc, label)[3] for x in node.orelse]
+    node.body = [analyseNode(x, pc, lc, label)[0] for x in node.body]
+    node.orelse = [analyseNode(x, pc, lc, label)[0] for x in node.orelse]
 
     return (node, pc, lc, label)
 
 def handleCall(node, pc, lc, label, ln, col):
     func_name = node.func.id
-    arg_levels = [analyseNode(x, pc, lc, label)[3] for x in node.args]
+    
+    arg_levels_analysis = [analyseNode(x, pc, lc, label) for x in node.args]
+    arg_levels = get_labels(arg_levels_analysis)
+    
+    node.args = get_nodes(arg_levels_analysis)
+
     args_level = get_least_upper_bound(arg_levels)
 
     # Check if all args are public
@@ -255,7 +314,11 @@ def handleDeclassify(node, pc, lc, label, ln, col):
     return (node, pc, lc, pif_public_label)
 
 def handleList(node, pc, lc, label, ln, col):
-    item_levels = [analyseNode(x, pc, lc, label)[3] for x in node.elts]
+    item_levels_analysis = [analyseNode(x, pc, lc, label) for x in node.elts]
+    item_levels = get_labels(item_levels_analysis)
+
+    node.elts = get_nodes(item_levels_analysis)
+
     list_label = is_labels_same(item_levels)
 
     if list_label == None:
@@ -273,15 +336,22 @@ def handleDict(node, pc, lc, label, ln, col):
     return (node, pc, lc, label)
 
 def handleSubscript(node, pc, lc, label, ln, col):
-    List_label = analyseNode(node.value, pc, lc, label)[3]
-    slice_label = analyseNode(node.slice, pc, lc, label)[3]
+    list_label_analysis = analyseNode(node.value, pc, lc, label)
+    list_label = list_label_analysis[3]
+    node.value = list_label_analysis[0]
 
-    label = get_least_upper_bound(List_label, slice_label)
+    slice_label_analysis = analyseNode(node.slice, pc, lc, label)
+    slice_label = slice_label_analysis[3]
+    node.slice = slice_label_analysis[0]    
+
+    label = get_least_upper_bound(list_label, slice_label)
 
     return (node, pc, lc, label)
 
 def handleIndex(node, pc, lc, label, ln, col):
-    return (node, pc, lc, analyseNode(node.value, pc, lc, label)[3])
+    node_analysis = analyseNode(node.value, pc, lc, label)
+    node.value = node_analysis[0]
+    return (node, pc, lc, node_analysis[3])
 
 def handleSlice(node, pc, lc, label, ln, col):
     upper_label = pif_public_label
@@ -289,12 +359,18 @@ def handleSlice(node, pc, lc, label, ln, col):
     lower_label = pif_public_label
 
     if node.upper:
-        upper_label = analyseNode(node.upper, pc, lc, label)[3]
+        upper_label_analysis = analyseNode(node.upper, pc, lc, label)
+        upper_label = upper_label_analysis[3]
+        node.upper = upper_label_analysis[0]
     if node.step:
-        step_label = analyseNode(node.step, pc, lc, label)[3]
+        step_label_analysis = analyseNode(node.step, pc, lc, label)
+        step_label = step_label_analysis[3]
+        node.step = step_label_analysis[0]
     if node.lower:
-        lower_label = analyseNode(node.lower, pc, lc, label)[3]
-
+        lower_label_analysis = analyseNode(node.lower, pc, lc, label)
+        lower_label = lower_label_analysis[3]
+        node.lower = lower_label_analysis[0]
+        
     label = get_least_upper_bound([upper_label, step_label, lower_label])
 
     return (node, pc, lc, label)
@@ -306,6 +382,12 @@ def handleEscape(node, pc, lc, label, ln, col):
     return (node, pc, lc, label)
 
 # Analysis helping functions
+
+def get_labels(l):
+    return [x[3] for x in l]
+
+def get_nodes(l):
+    return [x[0] for x in l]
 
 def is_labels_same(l):
     if not l:
@@ -324,7 +406,14 @@ def is_upper_bound(l1, l2):
 
 def get_least_upper_bound(l1, l2=None):
     if type(l1) == list:
-        return 1 if sum(l1) else 0 
+        le = len(l1)
+
+        if le == 0:
+            return pif_public_label
+        elif le == 1:
+            return l1[0]
+        else:
+            return 1 if sum(l1) else 0 
     else:
         return l1 if l1 > l2 else l2
     
