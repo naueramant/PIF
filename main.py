@@ -119,7 +119,7 @@ def analyseNode(node, pc, label):
     elif t == 'Dict':
         return handleDict(node, pc, label, ln, col) # TODO
     elif t == 'Subscript':
-        return handleSubscript(node, pc, label, ln, col) # TODO
+        return handleSubscript(node, pc, label, ln, col) 
     elif t == 'Call':
         return handleCall(node, pc, label, ln, col)
 
@@ -129,7 +129,7 @@ def analyseNode(node, pc, label):
     elif t == 'Slice':
         return handleSlice(node, pc, label, ln, col)
     elif t == 'ExtSlice':
-        return handleSlice(node, pc, label, ln, col) # TODO
+        return handleSlice(node, pc, label, ln, col) 
 
     # no handler defined for node, just return it
     printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
