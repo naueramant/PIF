@@ -11,7 +11,7 @@ try:
 
     max_test_length = len(max(tests, key=len)) + 4
 
-    print("{} tests found. Running tests.".format(len(tests)))
+    print("{} tests found. Running tests...".format(len(tests)))
     print("---------------------------------------")
 
     for test in tests:

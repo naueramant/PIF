@@ -421,7 +421,8 @@ def get_variable_label(node : ast.Name):
     try:
         return var_labels[node.id]
     except KeyError:
-        raise Exception('Unknown variable ' + node.id)
+        ln, col = get_node_pos(node)
+        printe('Unknown variable {}'.format(node.id), ln, col)
 
 def get_node_type(node):
     return type(node).__name__
@@ -446,6 +447,12 @@ def printw(msg, ln, col):
 
 def printb(msg, ln, col):
     print(colored('PIF ERROR 😭 confidentiality breach at ln {} col {}:'.format(ln, col), 'red'))
+    print('Msg: ', msg)
+    print('Src: ', get_source_at(ln, col))
+    exit(-1)
+
+def printe(msg, ln, col):
+    print(colored('PIF FATAL ERROR 🤯 ln {} col {}'.format(ln, col), 'red'))
     print('Msg: ', msg)
     print('Src: ', get_source_at(ln, col))
     exit(-1)
