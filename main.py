@@ -252,8 +252,6 @@ def handleFor(node, pc, lc, label, ln, col):
     target_level = target_level_analysis[3]
     node.target = target_level_analysis[0]
 
-    # -----
-
     t = get_node_type(node.iter)
 
     if t == 'Name':
