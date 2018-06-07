@@ -146,7 +146,10 @@ def analyseNode(node, pc, lc, label):
 def handleAssign(node, pc, lc, label, ln, col):
     current_level = pc[-1]
 
-    expr_level = analyseNode(node.value, pc, lc, label)[3]
+    node_analysis = analyseNode(node.value, pc, lc, label)
+    expr_level = node_analysis[3]
+
+    node.value = node_analysis[0]
     target_level = get_variable_label(node.targets[0])
 
     
@@ -234,9 +237,22 @@ def handleCall(node, pc, lc, label, ln, col):
     if func_name in ['print', 'exit']:
         if get_least_upper_bound(args_level, pc[-1]) != pif_public_label:
             printb(get_source_at(ln, col), ln, col)
-        
+    
+    if func_name == 'declassify':
+        node_analysis = handleDeclassify(node, pc, lc, label, ln, col)
+        node = node_analysis[0]
+        args_level = node_analysis[3]
+
     # result of function is the same as least upper bound of the given args
     return (node, pc, lc, args_level)
+
+def handleDeclassify(node, pc, lc, label, ln, col):
+    node = node.args[0]
+
+    if analyseNode(node, pc, lc, label)[3] == pif_public_label:
+        printw('No need to declassify public variables', ln, col)
+
+    return (node, pc, lc, pif_public_label)
 
 def handleList(node, pc, lc, label, ln, col):
     item_levels = [analyseNode(x, pc, lc, label)[3] for x in node.elts]

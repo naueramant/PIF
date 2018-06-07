@@ -1,0 +1,3 @@
+#should give warning
+a_public = 1
+b_public = declassify(a_public)
