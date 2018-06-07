@@ -114,6 +114,14 @@ def analyseNode(node, pc, label):
     elif t == 'Call':
         return handleCall(node, pc, label, ln, col)
 
+    # slice
+    elif t == 'Slice':
+        return handleSlice(node, pc, label, ln, col)
+    elif t == 'Index':
+        return handleIndex(node, pc, label, ln, col)
+    elif t = 'ExtSlice':
+        return (node, ln, col) # TODO
+
     # no handler defined for node, just return it
     printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
     return (node, pc, label)
@@ -226,6 +234,17 @@ def handleDict(node, pc, label, ln, col):
     return (node, pc, label)
 
 def handleSubscript(node, pc, label, ln, col):
+    List_label = analyseNode(node.value, pc, label)[2]
+    slice_label = analyseNode(node.slice, pc, label)[2]
+
+    label = get_least_upper_bound(List_label, slice_label)
+
+    return (node, pc, label)
+
+def handleIndex(node, pc, label, ln, col):
+    return (node, pc, label)
+
+def handleSlice(node, pc, label, ln, col):
     return (node, pc, label)
 
 # Analysis helping functions
