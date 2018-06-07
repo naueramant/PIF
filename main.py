@@ -135,7 +135,6 @@ def handleAssign(node, pc, label, ln, col):
     expr_level = analyseNode(node.value, pc, label)[2]
     target_level = get_variable_label(node.targets[0])
 
-    print('assign',current_level, expr_level, target_level)
     
     if not is_upper_bound(get_least_upper_bound(current_level, expr_level), target_level):
         printb(get_source_at(ln, col), ln, col)
@@ -194,7 +193,6 @@ def handleWhile(node, pc, label, ln, col):
     return (node, pc, label)
 
 def handleFor(node, pc, label, ln, col):
-    print(collection_element_labels)
     target_level = analyseNode(node.target,pc,label)[2]
     if get_node_type(node.iter) == 'Name':
         iter_el_labels = [collection_element_labels[node.iter.id]] 
@@ -204,12 +202,6 @@ def handleFor(node, pc, label, ln, col):
     iter_el_level = get_least_upper_bound(iter_el_labels)
     iter_ref_level = analyseNode(node.iter, pc, label)[2]
 
-
-
-    print('For')
-    print(node.iter.id, node.target.id)
-    print(iter_el_level, target_level, iter_ref_level)
-
     if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), target_level):
         printb(get_source_at(ln, col), ln, col)
     
@@ -217,8 +209,6 @@ def handleFor(node, pc, label, ln, col):
 
     [analyseNode(x, pc, label)[2] for x in node.body]
     [analyseNode(x, pc, label)[2] for x in node.orelse]
-
-    print(pc)
 
     return (node, pc, label)
 
