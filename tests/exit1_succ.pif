@@ -1,2 +1,2 @@
-a_public = 1
+a_public = 0
 exit(a_public)

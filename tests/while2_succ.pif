@@ -1,4 +1,4 @@
-a_secret = 0
+a_secret = 1
 b_public = 1
 
 while a_secret < 10:
