@@ -128,8 +128,8 @@ def analyseNode(node, pc, label):
         return handleSlice(node, pc, label, ln, col)
     elif t == 'Index':
         return handleIndex(node, pc, label, ln, col)
-    elif t = 'ExtSlice':
-        return (node, ln, col) # TODO
+    elif t == 'ExtSlice':
+        return (node, pc, label, ln, col) # TODO
 
     # no handler defined for node, just return it
     printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
@@ -279,7 +279,7 @@ def handleSubscript(node, pc, label, ln, col):
     return (node, pc, label)
 
 def handleIndex(node, pc, label, ln, col):
-    return (node, pc, label)
+    return (node, pc, analyseNode(node.value, pc, label)[2])
 
 def handleSlice(node, pc, label, ln, col):
     return (node, pc, label)
@@ -308,13 +308,18 @@ def get_least_upper_bound(l1, l2=None):
         return l1 if l1 > l2 else l2
     
 def get_variable_label(node : ast.Name):
-    return var_labels[node.id]
+    try:
+        return var_labels[node.id]
+    except KeyError:
+        raise Exception("Unknown variable " + node.id)
 
 def get_node_type(node):
     return type(node).__name__
 
 def get_node_pos(node):
-    return (node.lineno, node.col_offset)
+    if hasattr(node, 'lineno') and hasattr(node, 'col_offset'):
+        return (node.lineno, node.col_offset)
+    return (None, None)
 
 def is_name_confidential(node : ast.Name):
     return node.id.endswith('_secret') 
