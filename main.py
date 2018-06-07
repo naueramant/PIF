@@ -83,7 +83,7 @@ def analyseNode(node, pc, label):
     elif t == 'While':
         return handleWhile(node, pc, label, ln, col)
     elif t == 'For':
-        return handleFor(node, pc, label, ln, col) # TODO
+        return handleFor(node, pc, label, ln, col)
     elif t == 'Pass':
         return (node, pc, label)
     elif t == 'Break':
