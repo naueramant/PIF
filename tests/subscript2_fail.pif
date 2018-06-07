@@ -1,0 +1,2 @@
+a_secret = [1, 2, 3]
+b_public = a_secret[0]

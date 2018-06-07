@@ -1,0 +1,4 @@
+a_public = [1, 2, 3]
+index0_secret = 0
+index1_secret = 1
+b_public = a_public[index0_secret:index1_secret]
