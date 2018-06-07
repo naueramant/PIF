@@ -40,7 +40,7 @@ def labelNode(node):
             col_label = get_least_upper_bound(col_labels)
 
             collection_element_labels[node.targets[0].id] = col_label
-        elif get_node_type(node.value) == "Str":
+        elif get_node_type(node.value) == 'Str':
             collection_element_labels[node.targets[0].id] = pif_public_label
 
         # TODO: Support dicts
@@ -63,7 +63,7 @@ def doAnalysis(node, pc=None, label=None):
     if not label:
         label = pif_public_label
 
-    # Walk!
+    # Walk! the ast...
     if get_node_type(node) == 'Module':
         [doAnalysis(n, pc, label) for n in node.body]
     else:
@@ -85,11 +85,9 @@ def analyseNode(node, pc, label):
     elif t == 'For':
         return handleFor(node, pc, label, ln, col)
     elif t == 'Pass':
-        return (node, pc, label)
-    elif t == 'Break':
-        return (node, pc, label)  # TODO 
-    elif t == 'Continue': 
-        return (node, pc, label) # TODO 
+        return (node, pc, label) # Not handling timing attacks for now...
+    elif t in ['Break', 'Continue']:
+        return handleEscape(node, pc, label)
 
     # expr
     elif t == 'Name':
@@ -132,7 +130,7 @@ def analyseNode(node, pc, label):
         return handleSlice(node, pc, label, ln, col) 
 
     # no handler defined for node, just return it
-    printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
+    printw('Unsupported code \'{}\''.format(get_source_at(ln, col)), ln, col)
     return (node, pc, label)
 
 # Handling functions
@@ -279,6 +277,12 @@ def handleSlice(node, pc, label, ln, col):
 
     return (node, pc, label)
 
+def handleEscape(node, pc, label, ln, col):
+    if pc != pif_public_label:
+        printb('')
+
+    return (node, pc, label)
+
 # Analysis helping functions
 
 def is_labels_same(l):
@@ -306,7 +310,7 @@ def get_variable_label(node : ast.Name):
     try:
         return var_labels[node.id]
     except KeyError:
-        raise Exception("Unknown variable " + node.id)
+        raise Exception('Unknown variable ' + node.id)
 
 def get_node_type(node):
     return type(node).__name__
@@ -336,7 +340,7 @@ def get_source_at(ln, col):
 
 # Main
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main_ast = load_ast(sys.argv[1])
     source = open(sys.argv[1]).readlines()
 
