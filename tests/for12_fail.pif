@@ -1,0 +1,7 @@
+string_secret = 'test'
+a_public = [string_secret]
+c_public = ''
+
+for b_secret in a_public:
+    c_public = c_public + b_secret
+
