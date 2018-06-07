@@ -94,7 +94,7 @@ def analyseNode(node, pc, lc, label):
     elif t == 'Pass':
         return (node, pc, lc, label) # Not handling timing attacks for now...
     elif t in ['Break', 'Continue']:
-        return handleEscape(node, pc, lc, label)
+        return handleEscape(node, pc, lc, label, ln, col)
 
     # expr
     elif t == 'Name':
@@ -193,14 +193,16 @@ def handleWhile(node, pc, lc, label, ln, col):
     guard_level = analyseNode(node.test, pc, lc, label)[3]
     new_pc = get_least_upper_bound(guard_level, pc[-1])
 
-    if new_pc != pif_public_label:
+    if new_pc != pif_public_label: # TODO: is this right?
         printb(get_source_at(ln, col), ln, col)
     else:
         pc.append(new_pc)
+        lc.append(new_pc)
 
         [analyseNode(x, pc, lc, label)[3] for x in node.body]
         [analyseNode(x, pc, lc, label)[3] for x in node.orelse]
 
+        lc.pop()
         pc.pop()
 
     return (node, pc, lc, label)
@@ -284,8 +286,8 @@ def handleSlice(node, pc, lc, label, ln, col):
     return (node, pc, lc, label)
 
 def handleEscape(node, pc, lc, label, ln, col):
-    if pc != pif_public_label:
-        printb('')
+    if pc[-1] == pif_secret_label and lc[-1] == pif_public_label:
+        printb('Trying to escape a public loop from a secret context', ln, col)
 
     return (node, pc, lc, label)
 

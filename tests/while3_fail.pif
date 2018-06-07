@@ -1,0 +1,6 @@
+a_secret = 0
+b_public = 1
+
+while b_public < 10:
+    if a_secret == 1:
+        break

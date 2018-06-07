@@ -1,0 +1,6 @@
+a_public = 0
+b_public = 1
+
+while b_public < a_public:
+    if a_public == 1:
+        break

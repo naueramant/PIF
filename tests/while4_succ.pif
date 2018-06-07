@@ -1,0 +1,6 @@
+a_secret = 0
+b_secret = 1
+
+while b_secret < a_secret:
+    if a_secret == 1:
+        break
