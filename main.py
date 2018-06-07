@@ -9,6 +9,7 @@ pif_public_label = 0
 # Data
 
 var_labels = {}
+collection_element_labels = {}
 
 #
 # LABELING
@@ -31,6 +32,16 @@ def labelNode(node):
 
         var_labels[target.id] = label
 
+        if get_node_type(node.value) in ['List', 'Set', 'Tuple']:
+            n = node.value
+            items = n.elts
+
+            col_labels = [analyseNode(x, [pif_public_label], label)[2] for x in items]
+            col_label = get_least_upper_bound(col_labels)
+
+            collection_element_labels[node.targets[0]] = col_label
+
+        # TODO: Support dicts
 #
 # ANALYSIS
 # 
@@ -99,7 +110,7 @@ def analyseNode(node, pc, label):
     elif t == 'Dict':
         return handleDict(node, pc, label, ln, col) # TODO
     elif t == 'Subscript':
-        return (node, pc, label) # TODO
+        return handleSubscript(node, pc, label, ln, col) # TODO
     elif t == 'Call':
         return handleCall(node, pc, label, ln, col)
 
@@ -181,7 +192,7 @@ def handleCall(node, pc, label, ln, col):
 
     # Check if all args are public
     if func_name in ['print', 'exit']:
-        if args_level != pif_public_label:
+        if get_least_upper_bound(args_level, pc[-1]) != pif_public_label:
             printb(get_source_at(ln, col), ln, col)
         
     # result of function is the same as least upper bound of the given args
@@ -212,6 +223,9 @@ def handleSet(node, pc, label, ln, col):
     return handleList(node, pc, label, ln, col)
 
 def handleDict(node, pc, label, ln, col):
+    return (node, pc, label)
+
+def handleSubscript(node, pc, label, ln, col):
     return (node, pc, label)
 
 # Analysis helping functions
