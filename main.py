@@ -124,12 +124,12 @@ def analyseNode(node, pc, label):
         return handleCall(node, pc, label, ln, col)
 
     # slice
-    elif t == 'Slice':
-        return handleSlice(node, pc, label, ln, col)
     elif t == 'Index':
         return handleIndex(node, pc, label, ln, col)
+    elif t == 'Slice':
+        return handleSlice(node, pc, label, ln, col)
     elif t == 'ExtSlice':
-        return (node, pc, label, ln, col) # TODO
+        return handleSlice(node, pc, label, ln, col) # TODO
 
     # no handler defined for node, just return it
     printw('Unsupported code "{}"'.format(get_source_at(ln, col)), ln, col)
@@ -233,14 +233,6 @@ def handleCall(node, pc, label, ln, col):
     # result of function is the same as least upper bound of the given args
     else:
         return (node, pc, args_level)
-    
-    '''
-    # Warn that other functions are not supported
-    else:
-        printw('Unsupported function "{}"'.format(func_name), ln, col)
-    
-    return (node, pc, label)
-    '''
 
 def handleList(node, pc, label, ln, col):
     item_levels = [analyseNode(x, pc, label)[2] for x in node.elts]
@@ -272,6 +264,19 @@ def handleIndex(node, pc, label, ln, col):
     return (node, pc, analyseNode(node.value, pc, label)[2])
 
 def handleSlice(node, pc, label, ln, col):
+    upper_label = pif_public_label
+    step_label = pif_public_label
+    lower_label = pif_public_label
+
+    if node.upper:
+        upper_label = analyseNode(node.upper, pc, label)
+    if node.step:
+        step_label = analyseNode(node.step, pc, label)
+    if node.lower:
+        lower_label = analyseNode(node.lower, pc, label)
+
+    label = get_least_upper_bound([upper_label, step_label, lower_label])
+
     return (node, pc, label)
 
 # Analysis helping functions

@@ -1,0 +1,2 @@
+a_public = [1, 2, 3]
+b_public = a_public[::2]
