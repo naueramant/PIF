@@ -94,7 +94,7 @@ def analyseNode(node, pc, lc, label):
     elif t == 'Pass':
         return (node, pc, lc, label) # Not handling timing attacks for now...
     elif t in ['Break', 'Continue']:
-        return handleEscape(node, pc, lc, label, ln, col)
+        return handleEscape(node, pc, lc, label, ln, col) # Not handling timing and non-termination attacks for now...
 
     # expr
     elif t == 'Name':
@@ -193,17 +193,14 @@ def handleWhile(node, pc, lc, label, ln, col):
     guard_level = analyseNode(node.test, pc, lc, label)[3]
     new_pc = get_least_upper_bound(guard_level, pc[-1])
 
-    if new_pc != pif_public_label: # TODO: is this right?
-        printb(get_source_at(ln, col), ln, col)
-    else:
-        pc.append(new_pc)
-        lc.append(new_pc)
+    pc.append(new_pc)
+    lc.append(new_pc)
 
-        [analyseNode(x, pc, lc, label)[3] for x in node.body]
-        [analyseNode(x, pc, lc, label)[3] for x in node.orelse]
+    [analyseNode(x, pc, lc, label)[3] for x in node.body]
+    [analyseNode(x, pc, lc, label)[3] for x in node.orelse]
 
-        lc.pop()
-        pc.pop()
+    lc.pop()
+    pc.pop()
 
     return (node, pc, lc, label)
 
@@ -356,4 +353,4 @@ if __name__ == '__main__':
     new_source = astor.to_source(new_ast)
 
     #exec(source)
-    os.system('python3 {}'.format(sys.argv[1]))
+    #os.system('python3 {}'.format(sys.argv[1]))
