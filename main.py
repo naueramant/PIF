@@ -269,11 +269,11 @@ def handleSlice(node, pc, label, ln, col):
     lower_label = pif_public_label
 
     if node.upper:
-        upper_label = analyseNode(node.upper, pc, label)
+        upper_label = analyseNode(node.upper, pc, label)[2]
     if node.step:
-        step_label = analyseNode(node.step, pc, label)
+        step_label = analyseNode(node.step, pc, label)[2]
     if node.lower:
-        lower_label = analyseNode(node.lower, pc, label)
+        lower_label = analyseNode(node.lower, pc, label)[2]
 
     label = get_least_upper_bound([upper_label, step_label, lower_label])
 
