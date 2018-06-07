@@ -71,10 +71,11 @@ def doAnalysis(node, pc=None, lc=None, label=None):
 
     # Walk! the ast...
     if get_node_type(node) == 'Module':
-        node.body = [doAnalysis(n, pc, lc, label)[0] for n in node.body]
-        return node
+        node.body = [doAnalysis(n, pc, lc, label) for n in node.body]
     else:
-        return analyseNode(node, pc, lc, label)
+        node = analyseNode(node, pc, lc, label)[0]
+
+    return node
 
 def analyseNode(node, pc, lc, label):
     t = get_node_type(node)
@@ -82,7 +83,7 @@ def analyseNode(node, pc, lc, label):
 
     # stmt
     if t == 'Expr':
-        return analyseNode(node.value, pc, lc, label)
+        return (node, pc, lc, analyseNode(node.value, pc, lc, label)[3])
     elif t == 'Assign':
         return handleAssign(node, pc, lc, label, ln, col)
     elif t == 'If':
@@ -352,5 +353,4 @@ if __name__ == '__main__':
     new_ast = doAnalysis(main_ast)
     new_source = astor.to_source(new_ast)
 
-    #exec(source)
-    #os.system('python3 {}'.format(sys.argv[1]))
+    exec(new_source)

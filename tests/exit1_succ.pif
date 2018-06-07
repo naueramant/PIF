@@ -1,3 +1,2 @@
 a_public = 1
-
 exit(a_public)
