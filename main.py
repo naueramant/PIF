@@ -172,6 +172,16 @@ def handleWhile(node, pc, label, ln, col):
     return (node, pc, label)
 
 def handleFor(node, pc, label, ln, col):
+    target_level = analyseNode(node.target,pc,label)[2]
+    if get_node_type(node.iter) == 'Name':
+        iter_el_labels = [analyseNode(x, pc, label) for x in collection_element_labels if x.id = node.iter.id] 
+    else:
+        iter_el_labels = [analyseNode(x,pc,label) for x in node.iter.elts]
+    
+    iter_el_level = get_least_upper_bound(iter_el_labels)
+    iter_ref_level = analyseNode(node.iter, pc, label)[2]
+
+
     return (node, pc, label)
 
 def handleCall(node, pc, label, ln, col):
