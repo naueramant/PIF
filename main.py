@@ -138,7 +138,7 @@ def analyseNode(node, pc, lc, label):
         return handleSlice(node, pc, lc, label, ln, col) 
 
     # no handler defined for node, just return it
-    printw('Unsupported code \'{}\''.format(get_source_at(ln, col)), ln, col)
+    printw('Unsupported statement', ln, col)
     return (node, pc, lc, label)
 
 # Handling functions
@@ -153,7 +153,7 @@ def handleAssign(node, pc, lc, label, ln, col):
     target_level = get_variable_label(node.targets[0])
 
     if not is_upper_bound(get_least_upper_bound(current_level, expr_level), target_level):
-        printb(get_source_at(ln, col), ln, col)
+        printb("Can't assign secret to public variable {}".format(node.targets[0].id), ln, col)
     
     return (node, pc, lc, label)
 
@@ -247,7 +247,7 @@ def handleWhile(node, pc, lc, label, ln, col):
 
     return (node, pc, lc, label)
 
-def handleFor(node, pc, lc, label, ln, col): # TODO: fix analysis
+def handleFor(node, pc, lc, label, ln, col):
     target_level_analysis = analyseNode(node.target, pc, lc, label)
     target_level = target_level_analysis[3]
     node.target = target_level_analysis[0]
@@ -273,7 +273,7 @@ def handleFor(node, pc, lc, label, ln, col): # TODO: fix analysis
     node.iter = iter_ref_level_analysis[0]
 
     if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), target_level):
-        printb(get_source_at(ln, col), ln, col)
+        printb('Least upper bound is not upper bound', ln, col)
     
     pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
 
@@ -295,7 +295,7 @@ def handleCall(node, pc, lc, label, ln, col):
     # Check if all args are public
     if func_name in ['print', 'exit']:
         if get_least_upper_bound(args_level, pc[-1]) != pif_public_label:
-            printb(get_source_at(ln, col), ln, col)
+            printb('All arguments should be public', ln, col)
     
     if func_name == 'declassify':
         node_analysis = handleDeclassify(node, pc, lc, label, ln, col)
@@ -322,7 +322,7 @@ def handleList(node, pc, lc, label, ln, col):
     list_label = is_labels_same(item_levels)
 
     if list_label == None:
-        printb(get_source_at(ln, col), ln, col) # TODO: explain better
+        printb("Mixed confidentiality levels in list", ln, col)
 
     return (node, pc, lc, pif_public_label)
 
@@ -440,10 +440,14 @@ def load_ast(file):
     return astor.code_to_ast.parse_file(file)
 
 def printw(msg, ln, col):
-    print(colored('PIF WARNING 😐: ({}, {}):'.format(ln, col), 'yellow'), msg)
+    print(colored('PIF WARNING 😐 ln {} col {}:'.format(ln, col), 'yellow'))
+    print('Msg: ', msg)
+    print('Src: ', get_source_at(ln, col))
 
 def printb(msg, ln, col):
-    print(colored('PIF ERROR 😭 confidentiality breach ({}, {}):'.format(ln, col), 'red'), msg)
+    print(colored('PIF ERROR 😭 confidentiality breach at ln {} col {}:'.format(ln, col), 'red'))
+    print('Msg: ', msg)
+    print('Src: ', get_source_at(ln, col))
     exit(-1)
 
 def get_source_at(ln, col):
