@@ -9,13 +9,14 @@ pif_public_label = 0
 # Data
 
 var_labels = {}
+collection_element_labels = {}
 
 #
 # LABELING
 # 
 
 def doLabeling(node):
-    if hasattr(node, 'body'):
+    if get_node_type(node) == 'Module':
         [doLabeling(n) for n in node.body]
     else:
         labelNode(node)
@@ -31,6 +32,25 @@ def labelNode(node):
 
         var_labels[target.id] = label
 
+        if get_node_type(node.value) in ['List', 'Set', 'Tuple']:
+            n = node.value
+            items = n.elts
+
+            col_labels = [analyseNode(x, [pif_public_label], label)[2] for x in items]
+            col_label = get_least_upper_bound(col_labels)
+
+            collection_element_labels[node.targets[0].id] = col_label
+        elif get_node_type(node.value) == "Str":
+            collection_element_labels[node.targets[0].id] = pif_public_label
+
+        # TODO: Support dicts
+    elif t == 'For':
+        label = pif_public_label
+        target = node.target
+        if is_name_confidential(node.target):
+            label = pif_secret_label
+
+        var_labels[target.id] = label
 #
 # ANALYSIS
 # 
@@ -99,7 +119,7 @@ def analyseNode(node, pc, label):
     elif t == 'Dict':
         return handleDict(node, pc, label, ln, col) # TODO
     elif t == 'Subscript':
-        return (node, pc, label) # TODO
+        return handleSubscript(node, pc, label, ln, col) # TODO
     elif t == 'Call':
         return handleCall(node, pc, label, ln, col)
 
@@ -114,6 +134,8 @@ def handleAssign(node, pc, label, ln, col):
 
     expr_level = analyseNode(node.value, pc, label)[2]
     target_level = get_variable_label(node.targets[0])
+
+    print('assign',current_level, expr_level, target_level)
     
     if not is_upper_bound(get_least_upper_bound(current_level, expr_level), target_level):
         printb(get_source_at(ln, col), ln, col)
@@ -172,15 +194,31 @@ def handleWhile(node, pc, label, ln, col):
     return (node, pc, label)
 
 def handleFor(node, pc, label, ln, col):
+    print(collection_element_labels)
     target_level = analyseNode(node.target,pc,label)[2]
     if get_node_type(node.iter) == 'Name':
-        iter_el_labels = [analyseNode(x, pc, label) for x in collection_element_labels if x.id = node.iter.id] 
+        iter_el_labels = [collection_element_labels[node.iter.id]] 
     else:
         iter_el_labels = [analyseNode(x,pc,label) for x in node.iter.elts]
     
     iter_el_level = get_least_upper_bound(iter_el_labels)
     iter_ref_level = analyseNode(node.iter, pc, label)[2]
 
+
+
+    print('For')
+    print(node.iter.id, node.target.id)
+    print(iter_el_level, target_level, iter_ref_level)
+
+    if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), target_level):
+        printb(get_source_at(ln, col), ln, col)
+    
+    pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
+
+    [analyseNode(x, pc, label)[2] for x in node.body]
+    [analyseNode(x, pc, label)[2] for x in node.orelse]
+
+    print(pc)
 
     return (node, pc, label)
 
@@ -191,7 +229,7 @@ def handleCall(node, pc, label, ln, col):
 
     # Check if all args are public
     if func_name in ['print', 'exit']:
-        if args_level != pif_public_label:
+        if get_least_upper_bound(args_level, pc[-1]) != pif_public_label:
             printb(get_source_at(ln, col), ln, col)
         
     # result of function is the same as least upper bound of the given args
@@ -222,6 +260,9 @@ def handleSet(node, pc, label, ln, col):
     return handleList(node, pc, label, ln, col)
 
 def handleDict(node, pc, label, ln, col):
+    return (node, pc, label)
+
+def handleSubscript(node, pc, label, ln, col):
     return (node, pc, label)
 
 # Analysis helping functions
