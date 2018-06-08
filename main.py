@@ -6,6 +6,8 @@ from termcolor import colored
 pif_secret_label = {}
 pif_public_label = {}
 
+supported_iterables = ['Str', 'List', 'Tuple', 'Set']
+
 # Data
 
 var_labels = {}
@@ -27,6 +29,7 @@ def doLabeling(node):
 
 def labelNode(node):
     t = get_node_type(node)
+    ln, col = get_node_pos(node) 
 
     if t == 'Assign':
         target_name = node.targets[0].id
@@ -51,14 +54,14 @@ def labelNode(node):
 
                 res_dict[o.s] = temp_names
 
-            if get_node_type(node.value.args[0]) in ['Str', 'List', 'Tuple', 'Set']:
+            if get_node_type(node.value.args[0]) in supported_iterables:
                 collection_element_labels[target_name] = res_dict
             
             var_labels[target_name] = res_dict
 
             node.value = func.args[0] 
         else:
-            if not hasattr(var_labels, target_name):
+            if not target_name in var_labels:
                 if get_node_type(node.value) == 'Str':
                     collection_element_labels[target_name] = pif_public_label
 
@@ -69,16 +72,19 @@ def labelNode(node):
     elif t == 'For':
         label = pif_public_label
         target = node.target
-        if is_name_confidential(node.target):
-            label = pif_secret_label
 
-        var_labels[target.id] = label
-
+        if get_node_type(node.iter) == 'Name':
+            if node.iter.id in var_labels:
+                var_labels[target.id] = var_labels[node.iter.id]
+            else:
+                printe('Unknown variable {}'.format(node.iter.id), ln, col)
+        else:
+            var_labels[target.id] = pif_public_label
+        
     # Authorities and principals
     elif t == 'Expr':
         if get_node_type(node.value) == 'Call':
             c = node.value
-            ln, col = get_node_pos(node)
 
             if c.func.id == 'principals':
                 for a in c.args:
@@ -426,7 +432,8 @@ def handleSlice(node, pc, lc, label, ln, col):
     return (node, pc, lc, label)
 
 def handleEscape(node, pc, lc, label, ln, col):
-    if pc[-1] == pif_secret_label and lc[-1] == pif_public_label:
+    print(pc[-1], lc[-1])
+    if  lc[-1] != pc[-1] and is_upper_bound(lc[-1], pc[-1]):
         printb('Trying to escape a public loop from a secret context', ln, col)
 
     return (node, pc, lc, label)
@@ -499,9 +506,6 @@ def get_node_pos(node):
     if hasattr(node, 'lineno') and hasattr(node, 'col_offset'):
         return (node.lineno, node.col_offset)
     return (None, None)
-
-def is_name_confidential(node : ast.Name):
-    return node.id.endswith('_secret') 
 
 # Other helping functions
 

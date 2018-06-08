@@ -1,0 +1,12 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+for i in a:
+    print(i)
