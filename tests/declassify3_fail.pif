@@ -1,0 +1,13 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label('test', {'Alice': []})
+ab = label('', {'Alice': [], 'Bob': []})
+ab = a

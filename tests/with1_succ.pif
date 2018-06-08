@@ -1,0 +1,16 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(10, {'Bob': []})
+b = label(20, {'Alice': []})
+
+if a > 0:
+    with {'Alice'} as authority:
+        print(b)

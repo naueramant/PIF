@@ -9,4 +9,4 @@ authorities(
 )
 
 a = label(not True, {'Alice': ['Bob']})
-b = declassify(a, {'public'})
+b = declassify(a, {'public': []})

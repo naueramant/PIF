@@ -363,7 +363,6 @@ def handleCall(node, pc, lc, label, ln, col):
 
 # Declassify is not robust!
 def handleDeclassify(node, pc, lc, label, ln, col):
-    print(node)
     new_node = node.args[0]
     node_analysis = analyseNode(new_node, pc, lc, label)
 
@@ -377,26 +376,42 @@ def handleDeclassify(node, pc, lc, label, ln, col):
     auth_arg = node.args[1]
     auth_arg_type = get_node_type(auth_arg)
 
-    if auth_arg_type != 'Set':
+    if auth_arg_type != 'Dict':
         # This exites the analysis
-        printe('Authorities must be defined in a set', ln, col)
+        printe('Authorities must be defined in a dict', ln, col)
     else:
         new_label = {}
 
-        auth_arg_len = len(auth_arg.elts)
+        auth_arg_len = len(auth_arg.keys)
 
         if auth_arg_len == 0:
             new_label = pif_secret_label
         else:
-            for s in auth_arg.elts:
-                if get_node_type(s) == 'Str':
-                    if s.s == 'public':
+            owners = auth_arg.keys
+            guestslist = auth_arg.values
+
+            for o, l in zip(owners, guestslist):
+                if get_node_type(o) == 'Str':
+                    
+                    if o.s == 'public':
                         new_label = pif_public_label
                         break
 
-                    new_label[s.s] = []
+                    guests = []
+
+                    for g in l.elts:
+                        if get_node_type(g) == 'Str':
+                                guests.append(g.s)
+                        else:
+                            printe('Users must be a string literals', ln, col)
+
+                    new_label[o.s] = guests
                 else:
                     printe('Authorities must be a string literals', ln, col)
+
+        # TODO: should we check if the new label is less restrictive?
+        # And can we declassify to something that the original owners
+        # is not a part of?
 
         label = new_label
 
@@ -465,7 +480,6 @@ def handleSlice(node, pc, lc, label, ln, col):
     return (node, pc, lc, label)
 
 def handleEscape(node, pc, lc, label, ln, col):
-    print(pc[-1], lc[-1])
     if  lc[-1] != pc[-1] and is_upper_bound(lc[-1], pc[-1]):
         printb('Trying to escape a public loop from a secret context', ln, col)
 
@@ -572,20 +586,8 @@ if __name__ == '__main__':
     source = open(sys.argv[1]).readlines()
 
     labeled_ast = doLabeling(main_ast)
-    print("Authorities---------------------")
-    print(principals)
-    print("Authorities---------------------")
-    print(authorities)
-    print("Var labels---------------------")
-    print(var_labels)
-    print("Collection labels---------------------")
-    print(collection_element_labels)
-    print("-------------------------------")
-
     new_ast = doAnalysis(labeled_ast)
     new_source = astor.to_source(new_ast)
-
-    print(new_source)
 
     exec(new_source)
     

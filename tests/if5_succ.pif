@@ -11,5 +11,5 @@ authorities(
 a = label(True, {'Alice': []})
 b = 3
 
-if declassify(a, {'public'}):
+if declassify(a, {'public': []}):
     b = 2
