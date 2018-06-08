@@ -1,6 +1,15 @@
-a_public = 'test'
-c_public = ''
+principals(
+    'Alice',
+    'Bob'
+)
 
-for b_public in a_public:
-    c_public = c_public + b_public
+authorities(
+    'Alice',
+    'Bob'
+)
 
+a = 'test'
+c = ''
+
+for b in a:
+    c = c + b

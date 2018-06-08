@@ -1,4 +1,14 @@
-a_secret = 1
-b_public = 2
+principals(
+    'Alice',
+    'Bob'
+)
 
-c_secret = b_public + 1
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(1, {'Alice': ['Bob']})
+b = 0
+
+a = b + 1

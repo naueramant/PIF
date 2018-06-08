@@ -341,7 +341,8 @@ def handleCall(node, pc, lc, label, ln, col):
 
     # Check if all args are public
     if func_name in ['print', 'exit']:
-        if get_least_upper_bound(args_level, pc[-1]) != pif_public_label:
+        print(get_least_upper_bound(args_level, pc[-1]))
+        if get_least_upper_bound(args_level, pc[-1]) != get_allowed_principals(pif_public_label):
             printb('All arguments should be public', ln, col)
     
     if func_name == 'declassify':
@@ -456,11 +457,18 @@ def get_least_upper_bound(l1, l2=None):
     res = principals
     if type(l1) == list:
         for l in l1:
-            res = res & get_allowed_principals(l)
-    else:
-        res = get_allowed_principals(l1) & get_allowed_principals(l2)
-    return res
+            if type(l) == dict:
+                l = get_allowed_principals(l)
 
+            res = res & l
+    else:
+        if type(l1) == dict:
+            l1 = get_allowed_principals(l1)
+        if type(l2) == dict:
+            l2 = get_allowed_principals(l2)
+
+        res = l1 & l2
+    return res
 
 def get_allowed_principals(lbl):
     res = principals
@@ -472,6 +480,7 @@ def get_allowed_principals(lbl):
     res = res | owners
     return res
 
+# TODO: remove?
 def get_allowed_principals_dict(lbl):
     res = dict()
     readers =  principals

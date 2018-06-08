@@ -1,2 +1,0 @@
-a_public = {'a': 2}
-b_public = a_public['a']

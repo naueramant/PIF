@@ -1,6 +1,15 @@
-a_secret = ''
-c_public = ''
+principals(
+    'Alice',
+    'Bob'
+)
 
-for b_public in a_secret:
-    c_public = c_public + b_public
+authorities(
+    'Alice',
+    'Bob'
+)
 
+a = label('', {'Alice': ['Bob']})
+c = ''
+
+for b in a:
+    c = c + b

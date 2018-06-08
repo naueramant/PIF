@@ -1,6 +1,16 @@
-a_secret = 0
-b_secret = 1
+principals(
+    'Alice',
+    'Bob'
+)
 
-while b_secret < a_secret:
-    if a_secret == 1:
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(0, {'Alice': ['Bob']})
+b = label(1, {'Alice': ['Bob']})
+
+while b < a:
+    if a == 1:
         break

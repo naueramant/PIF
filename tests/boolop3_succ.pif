@@ -1,3 +1,13 @@
-a_secret = True
+principals(
+    'Alice',
+    'Bob'
+)
 
-b_public = declassify(a_secret) or True
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(True, {'Alice': []})
+
+b = declassify(a) or True

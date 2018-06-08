@@ -1,3 +1,12 @@
-a_secret = "Hej"
+principals(
+    'Alice',
+    'Bob'
+)
 
-print(declassify(a_secret))
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label("Hej", {'Alice': []})
+print(declassify(a, 'public'))

@@ -1,3 +1,13 @@
-a_secret = True
+principals(
+    'Alice',
+    'Bob'
+)
 
-b_public = a_secret or True
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(True, {'Alice': []})
+
+b = a or True

@@ -1,2 +1,14 @@
-a_secret = not True
-b_public = a_secret 
+# Assigning Alice's variable to public
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(not True, {'Alice': ['Bob']})
+b = True
+b = a

@@ -1,2 +1,12 @@
-a_secret = not True
-b_public = declassify(a_secret) 
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(not True, {'Alice': ['Bob']})
+b = declassify(a, 'public')

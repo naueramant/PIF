@@ -1,2 +1,12 @@
-a_secret = True
-b_public = 1 if a_secret else 2
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(True, {'Alice': ['Bob']})
+b = 1 if a else 2

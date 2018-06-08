@@ -1,2 +1,12 @@
-a_secret = 2
-1 > a_secret > 3 > 42 > 333 > 666
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(2, {'Alice': []})
+1 > a > 3 > 42 > 333 > 666

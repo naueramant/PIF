@@ -1,4 +1,14 @@
-a_public = 0
+principals(
+    'Alice',
+    'Bob'
+)
 
-while a_public < 10:
-    a_public = a_public + 1
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = 0
+
+while a < 10:
+    a = a + 1

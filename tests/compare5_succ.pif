@@ -1,2 +1,12 @@
-a_secret = 2
-b_public = 1 > 4 > 3 > 42 > 333 > declassify(a_secret)
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(2, {'Alice': []})
+b = 1 > 4 > 3 > 42 > 333 > declassify(a, 'public')

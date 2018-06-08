@@ -1,7 +1,16 @@
-string_secret = 'test'
-a_public = [string_secret]
-c_public = ''
+principals(
+    'Alice',
+    'Bob'
+)
 
-for b_public in a_public:
-    c_public = c_public + b_public
+authorities(
+    'Alice',
+    'Bob'
+)
 
+test_string = label('test', {'Alice': ['Bob']})
+a = label([test_string], {'Alice': ['Bob']})
+c = ''
+
+for b in a:
+    c = c + b

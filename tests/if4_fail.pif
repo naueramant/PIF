@@ -1,6 +1,16 @@
-a_secret = 1
-b_public = 2
+principals(
+    'Alice',
+    'Bob'
+)
 
-if a_secret:
-    if b_public > 1:
-        b_public = 3
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(1, {'Alice': ['Bob']})
+b = 2
+
+if a:
+    if b > 1:
+        b = 3

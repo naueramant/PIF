@@ -1,6 +1,16 @@
-a_public = 0
-b_public = 1
+principals(
+    'Alice',
+    'Bob'
+)
 
-while b_public < a_public:
-    if a_public == 1:
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = 0
+b = 1
+
+while b < a:
+    if a == 1:
         break

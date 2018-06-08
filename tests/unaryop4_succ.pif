@@ -1,1 +1,11 @@
-b_public = +1
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = +1

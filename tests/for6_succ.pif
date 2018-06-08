@@ -1,6 +1,15 @@
-a_secret = ['0']
-c_secret = ''
+principals(
+    'Alice',
+    'Bob'
+)
 
-for b_secret in a_secret:
-    c_secret = c_secret + b_secret
+authorities(
+    'Alice',
+    'Bob'
+)
 
+a = label(['0'], {'Alice': ['Bob']})
+c = label('', {'Alice': ['Bob']})
+
+for b in a:
+    c = c + b
