@@ -1,2 +1,15 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
 content_public = 'a'
 b_secret = {content_public}
+
+a = label('a', {'Alice': []})
+b = label({a}, {'Alice': []})

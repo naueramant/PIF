@@ -8,7 +8,7 @@ authorities(
     'Bob'
 )
 
-a = label([], {'Alice': ['Bob']})
+a = label([], {'Alice': []})
 c = ''
 
 for b in a:

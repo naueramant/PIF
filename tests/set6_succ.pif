@@ -1,4 +1,14 @@
-a_secret = 1
-b_secret = 2
-c_secret = 3
-d_public = {a_secret, b_secret, c_secret}
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(1, {'Alice': []})
+b = label(2, {'Alice': []})
+c = label(3, {'Alice': []})
+d = {a, b, c}

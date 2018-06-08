@@ -8,7 +8,7 @@ authorities(
     'Bob'
 )
 
-a = label(1, {'Alice': ['Bob']})
+a = label(1, {'Alice': []})
 b = 1
 
 while b < 10:

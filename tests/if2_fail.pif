@@ -8,7 +8,7 @@ authorities(
     'Bob'
 )
 
-a = label(True, {'Alice': ['Bob']})
+a = label(True, {'Alice': []})
 b = 3
 
 if a:

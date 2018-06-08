@@ -8,5 +8,5 @@ authorities(
     'Bob'
 )
 
-a = label(True, {'Alice': ['Bob']})
+a = label(True, {'Alice': []})
 b = 1 if declassify(a, 'public') else 2

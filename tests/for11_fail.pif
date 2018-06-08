@@ -8,8 +8,8 @@ authorities(
     'Bob'
 )
 
-test_string = label('test', {'Alice': ['Bob']})
-a = label([test_string], {'Alice': ['Bob']})
+test_string = label('test', {'Alice': []})
+a = label([test_string], {'Alice': []})
 c = ''
 
 for b in a:

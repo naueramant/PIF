@@ -8,7 +8,7 @@ authorities(
     'Bob'
 )
 
-a = label(2, {'Alice': ['Bob']})
+a = label(2, {'Alice': []})
 b = 1
 
 if b:

@@ -1,2 +1,12 @@
-a_public = [1, 2, 3]
-b_public = a_public[0:0]
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = [1, 2, 3]
+b = a[0:0]

@@ -8,4 +8,7 @@ authorities(
     'Bob'
 )
 
-a = label({1, 2, 3}, {'Alice': []})
+a = label(1, {'Alice': []})
+b = 2
+c = label(3, {'Alice': []})
+d = [a, b, c]

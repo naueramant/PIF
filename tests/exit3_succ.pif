@@ -8,5 +8,5 @@ authorities(
     'Bob'
 )
 
-a = label(1, {'Alice': []})
+a = label(0, {'Alice': []})
 exit(declassify(a, 'public'))

@@ -1,2 +1,12 @@
-content_public = 'a'
-b_secret = (content_public)
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+content = 'a'
+b = label((content), {'Alice': []})

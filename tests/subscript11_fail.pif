@@ -1,3 +1,13 @@
-a_public = [1, 2, 3]
-index_secret = 1
-b_public = a_public[0:index_secret]
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = [1, 2, 3]
+index = label(1, {'Alice': []})
+b = a[0:index]

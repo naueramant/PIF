@@ -1,4 +1,21 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
 a_secret = 1
 b_public = 2
 c_secret = 3
 d_secret = (a_secret, b_public, c_secret)
+
+
+
+a = label(1, {'Alice': []})
+b = 2
+c = label(3, {'Alice': []})
+d = label((a, b, c), {'Alice': []})

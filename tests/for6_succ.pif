@@ -8,8 +8,8 @@ authorities(
     'Bob'
 )
 
-a = label(['0'], {'Alice': ['Bob']})
-c = label('', {'Alice': ['Bob']})
+a = label(['0'], {'Alice': []})
+c = label('', {'Alice': []})
 
 for b in a:
     c = c + b

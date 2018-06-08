@@ -1,1 +1,11 @@
-a_public = {1, 2, 3}
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = {1, 2, 3}

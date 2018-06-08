@@ -1,11 +1,21 @@
-a_secret = 42
-b_public = 0
+principals(
+    'Alice',
+    'Bob'
+)
 
-while b_public < declassify(a_secret):
-    if b_public / 7 == 0:
-        b_public = b_public + 40
-    elif b_public / 10 == 2:
-        b_public = b_public + 40
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(42, {'Alice': []})
+b = 0
+
+while b < declassify(a, 'public'):
+    if b / 7 == 0:
+        b = b + 40
+    elif b / 10 == 2:
+        b = b + 40
     else:
-        b_public = b_public - 1
-    print(b_public)
+        b = b - 1
+    print(b)

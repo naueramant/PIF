@@ -8,5 +8,5 @@ authorities(
     'Bob'
 )
 
-a = label(True, {'Alice': ['Bob']})
-b = label(1 if a else 2, {'Alice': ['Bob']})
+a = label(True, {'Alice': []})
+b = label(1 if a else 2, {'Alice': []})

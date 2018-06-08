@@ -50,12 +50,18 @@ def labelNode(node):
                     temp_names.append(guest.s)
 
                 res_dict[o.s] = temp_names
+
+            if get_node_type(node.value.args[0]) in ['Str', 'List', 'Tuple', 'Set']:
+                collection_element_labels[target_name] = res_dict
             
             var_labels[target_name] = res_dict
 
             node.value = func.args[0] 
         else:
             if not hasattr(var_labels, target_name):
+                if get_node_type(node.value) == 'Str':
+                    collection_element_labels[target_name] = pif_public_label
+
                 var_labels[target_name] = pif_public_label
 
         # TODO: Support dicts
@@ -298,7 +304,6 @@ def handleWhile(node, pc, lc, label, ln, col):
 
 def handleFor(node, pc, lc, label, ln, col):
     target_level_analysis = analyseNode(node.target, pc, lc, label)
-    target_level = target_level_analysis[3]
     node.target = target_level_analysis[0]
 
     t = get_node_type(node.iter)
@@ -318,9 +323,6 @@ def handleFor(node, pc, lc, label, ln, col):
     iter_ref_level_analysis = analyseNode(node.iter, pc, lc, label)
     iter_ref_level = iter_ref_level_analysis[3]
     node.iter = iter_ref_level_analysis[0]
-
-    if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), get_allowed_principals(target_level)):
-        printb('Least upper bound is not upper bound', ln, col)
     
     pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
 
@@ -370,7 +372,7 @@ def handleList(node, pc, lc, label, ln, col):
     list_label = is_labels_same(item_levels)
 
     if list_label == None:
-        printb("Mixed confidentiality levels in list", ln, col)
+        printb("Mixed confidentiality levels in collection", ln, col)
 
     return (node, pc, lc, pif_public_label)
 
@@ -471,6 +473,9 @@ def get_least_upper_bound(l1, l2=None):
     return res
 
 def get_allowed_principals(lbl):
+    if len(lbl) == 0:
+        return set()
+
     res = principals
     owners = set()
     for key in lbl:
@@ -478,20 +483,6 @@ def get_allowed_principals(lbl):
         owners.add(key)
         res = res & temp
     res = res | owners
-    return res
-
-# TODO: remove?
-def get_allowed_principals_dict(lbl):
-    res = dict()
-    readers =  principals
-    owners = set()
-    for key in lbl:
-        temp = set(lbl[key])
-        readers = readers & temp
-        owners.add(key)
-    
-    for o in owners:
-        res[o] = readers
     return res
     
 def get_variable_label(node : ast.Name):
@@ -535,7 +526,7 @@ def printe(msg, ln, col):
     exit(-1)
 
 def get_source_at(ln, col):
-    return source[ln-1][col:].replace('\n', '')
+    return source[ln-1].replace('\n', '')
 
 # Main
 
@@ -550,6 +541,8 @@ if __name__ == '__main__':
     print(authorities)
     print("Var labels---------------------")
     print(var_labels)
+    print("Collection labels---------------------")
+    print(collection_element_labels)
     print("-------------------------------")
 
     new_ast = doAnalysis(labeled_ast)

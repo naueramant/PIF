@@ -9,5 +9,5 @@ authorities(
     'Bob'
 )
 
-a = label(True, {'Alice': ['Bob']})
+a = label(True, {'Alice': []})
 b = not a
