@@ -683,5 +683,3 @@ if __name__ == '__main__':
 
         if not args.analyse:
             exec(new_source)
-        
-    
