@@ -10,7 +10,9 @@ pif_public_label = 0
 
 var_labels = {}
 collection_element_labels = {}
+
 authorities = set()
+principals = set()
 
 #
 # LABELING
@@ -55,15 +57,34 @@ def labelNode(node):
 
         var_labels[target.id] = label
 
+    # Authorities and principals
     elif t == 'Expr':
         if get_node_type(node.value) == 'Call':
             c = node.value
-            if c.func.id == 'authorities':
+            ln, col = get_node_pos(node)
+
+            if c.func.id == 'principals':
                 for a in c.args:
                     if get_node_type(a) == 'Str':
-                        authorities.add(a.s)
+                        principals.add(a.s)
                     else:
-                        printe('Authorities can only be string literals')
+                        printe('Principals can only be string literals', ln, col)
+
+                return None # Remove ast node form the real program
+                
+            elif c.func.id == 'authorities':
+                for a in c.args:
+                    if len(principals) == 0:
+                        printe('Principals must be defined before authorities', ln, col)
+
+                    if get_node_type(a) == 'Str':
+                        if a.s in principals:
+                            authorities.add(a.s)
+                        else:
+                            printe('Can\'t add authroity {} since it is not present in principals'.format(a.s), ln, col)
+
+                    else:
+                        printe('Authorities can only be string literals', ln, col)
 
                 return None # Remove ast node form the real program
 
@@ -76,8 +97,6 @@ def labelNode(node):
 def doAnalysis(node, pc=None, lc=None, label=None):
     # generate the labels
     node = doLabeling(node)
-
-    print(authorities)
 
     # default values
     if not pc:
