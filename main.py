@@ -353,11 +353,17 @@ def handleFor(node, pc, lc, label, ln, col):
     iter_ref_level_analysis = analyseNode(node.iter, pc, lc, label)
     iter_ref_level = iter_ref_level_analysis[3]
     node.iter = iter_ref_level_analysis[0]
+
+    new_pc = get_least_upper_bound(pc[-1], iter_ref_level)
     
-    pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
+    pc.append(new_pc)
+    lc.append(new_pc)
 
     node.body = flatten_list([analyseNode(x, pc, lc, label)[0] for x in node.body])
     node.orelse = flatten_list([analyseNode(x, pc, lc, label)[0] for x in node.orelse])
+
+    lc.pop()
+    pc.pop()
 
     return (node, pc, lc, label)
 
