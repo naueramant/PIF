@@ -9,10 +9,7 @@ authorities(
     'Ulrik'
 )
 
-a = label(42, {'Bob': ['Alice']})
-b = label(0, {'Alice': []})
+a = label(42, {'Alice': ['Bob'], 'Bob': ['Ulrik']})
+b = label(0, {'Bob': ['Alice']})
 s = label(0, {})
-
-if a > 0:
-    if b == 0:
-        b = a + 1
+p = 42

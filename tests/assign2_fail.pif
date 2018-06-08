@@ -1,5 +1,14 @@
-a_secret = 2
-b_public = 42
+principals(
+    'Alice',
+    'Bob'
+)
 
-a_secret = b_public
-b_public = a_secret
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(69, {'Alice': ['Bob']})
+b = label(42, {'Bob': []})
+
+a = b

@@ -3,8 +3,8 @@ from termcolor import colored
 
 # Global prefs
 
-pif_secret_label = 1
-pif_public_label = 0
+pif_secret_label = {}
+pif_public_label = {}
 
 # Data
 
@@ -29,23 +29,34 @@ def labelNode(node):
     t = get_node_type(node)
 
     if t == 'Assign':
-        label = pif_public_label
-        target = node.targets[0]
-        if is_name_confidential(node.targets[0]):
-            label = pif_secret_label
+        target_name = node.targets[0].id
 
-        var_labels[target.id] = label
+        if get_node_type(node.value) == 'Call' and node.value.func.id == 'label':
+            func = node.value
+            labels = func.args[1]
+            
+            guestslist = []
+            owners = []
+            if hasattr(labels, 'keys'):
+                owners = labels.keys
+                guestslist = labels.values  
 
-        if get_node_type(node.value) in ['List', 'Set', 'Tuple']:
-            n = node.value
-            items = n.elts
+            res_dict = {}
 
-            col_labels = [analyseNode(x, [pif_public_label], [pif_public_label], label)[3] for x in items]
-            col_label = get_least_upper_bound(col_labels)
+            for o, l in zip(owners, guestslist):
+                temp_names = []
+                
+                for guest in l.elts:
+                    temp_names.append(guest.s)
 
-            collection_element_labels[node.targets[0].id] = col_label
-        elif get_node_type(node.value) == 'Str':
-            collection_element_labels[node.targets[0].id] = pif_public_label
+                res_dict[o.s] = temp_names
+            
+            var_labels[target_name] = res_dict
+
+            node.value = func.args[0] 
+        else:
+            if not hasattr(var_labels, target_name):
+                var_labels[target_name] = pif_public_label
 
         # TODO: Support dicts
 
@@ -69,9 +80,13 @@ def labelNode(node):
                         principals.add(a.s)
                     else:
                         printe('Principals can only be string literals', ln, col)
-
-                return None # Remove ast node form the real program
                 
+                # Generate the public label
+                for p in principals:
+                    pif_public_label[p] = [x for x in principals if x != p]
+
+                return None # Remove ast node from the real program
+
             elif c.func.id == 'authorities':
                 for a in c.args:
                     if len(principals) == 0:
@@ -95,13 +110,9 @@ def labelNode(node):
 # 
 
 def doAnalysis(node, pc=None, lc=None, label=None):
-    # generate the labels
-    node = doLabeling(node)
-
     # default values
     if not pc:
         pc = [pif_public_label]
-
     if not label:
         label = pif_public_label
     if not lc:
@@ -190,8 +201,8 @@ def handleAssign(node, pc, lc, label, ln, col):
     node.value = node_analysis[0]
     target_level = get_variable_label(node.targets[0])
 
-    if not is_upper_bound(get_least_upper_bound(current_level, expr_level), target_level):
-        printb("Can't assign secret to public variable {}".format(node.targets[0].id), ln, col)
+    if not is_upper_bound(get_least_upper_bound(current_level, expr_level), get_allowed_principals(target_level)):
+        printb("Confidentiality mismatch", ln, col)
     
     return (node, pc, lc, label)
 
@@ -308,7 +319,7 @@ def handleFor(node, pc, lc, label, ln, col):
     iter_ref_level = iter_ref_level_analysis[3]
     node.iter = iter_ref_level_analysis[0]
 
-    if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), target_level):
+    if not is_upper_bound(get_least_upper_bound(pc[-1], iter_el_level), get_allowed_principals(target_level)):
         printb('Least upper bound is not upper bound', ln, col)
     
     pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
@@ -437,16 +448,17 @@ def is_labels_same(l):
     
         return label
 
+# l2 upperbound of l1
 def is_upper_bound(l1, l2):
-    return l1 == l2 or len(l2) > len(l1)
+    return sorted(list(l1)) == sorted(list(l2)) or len(l2) < len(l1)
 
 def get_least_upper_bound(l1, l2=None):
     res = principals
     if type(l1) == list:
         for l in l1:
-            res = res & l
+            res = res & get_allowed_principals(l)
     else:
-        res = l1 & l2
+        res = get_allowed_principals(l1) & get_allowed_principals(l2)
     return res
 
 
@@ -522,8 +534,19 @@ if __name__ == '__main__':
     main_ast = load_ast(sys.argv[1])
     source = open(sys.argv[1]).readlines()
 
-    new_ast = doAnalysis(main_ast)
+    labeled_ast = doLabeling(main_ast)
+    print("Authorities---------------------")
+    print(principals)
+    print("Authorities---------------------")
+    print(authorities)
+    print("Var labels---------------------")
+    print(var_labels)
+    print("-------------------------------")
+
+    new_ast = doAnalysis(labeled_ast)
     new_source = astor.to_source(new_ast)
+
+    print(new_source)
 
     exec(new_source)
     
