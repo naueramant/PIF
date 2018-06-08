@@ -438,20 +438,40 @@ def is_labels_same(l):
         return label
 
 def is_upper_bound(l1, l2):
-    return l1 <= l2
+    return l1 == l2 or len(l2) > len(l1)
 
 def get_least_upper_bound(l1, l2=None):
+    res = principals
     if type(l1) == list:
-        le = len(l1)
-
-        if le == 0:
-            return pif_public_label
-        elif le == 1:
-            return l1[0]
-        else:
-            return 1 if sum(l1) else 0 
+        for l in l1:
+            res = res & l
     else:
-        return l1 if l1 > l2 else l2
+        res = l1 & l2
+    return res
+
+
+def get_allowed_principals(lbl):
+    res = principals
+    owners = set()
+    for key in lbl:
+        temp = set(lbl[key])
+        owners.add(key)
+        res = res & temp
+    res = res | owners
+    return res
+
+def get_allowed_principals_dict(lbl):
+    res = dict()
+    readers =  principals
+    owners = set()
+    for key in lbl:
+        temp = set(lbl[key])
+        readers = readers & temp
+        owners.add(key)
+    
+    for o in owners:
+        res[o] = readers
+    return res
     
 def get_variable_label(node : ast.Name):
     try:
