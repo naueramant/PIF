@@ -1,0 +1,16 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label('test', {'Alice': []})
+b = 1
+
+while b == 1:
+    print(declassify(a, {'public': []}))
+    b = 2

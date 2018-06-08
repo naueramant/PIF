@@ -1,0 +1,15 @@
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = label(10, {'Bob': []})
+b = label(20, {'Alice': []})
+
+if a > 0:
+    print(declassify(a, {'public': []}))

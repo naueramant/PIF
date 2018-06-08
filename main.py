@@ -16,6 +16,22 @@ collection_element_labels = {}
 authorities = set()
 principals = set()
 
+# Errors and warnings
+error_unknown_variable = 'Unknown variable {}'
+error_principal_strings = 'Principals can only be string literals'
+error_principal_authorities = 'Principals must be defined before authorities'
+error_authorities_are_principals = 'Can\'t add authroity {} since it is not present in principals'
+error_authorities_strings = 'Authorities can only be string literals'
+error_conf_mismatch = 'Confidentiality mismatch'
+error_public_arguments = 'All arguments should be public'
+error_declassify_args = 'declassify() needs a expr and a set of authorities as strings'
+error_authority_dict = 'Authorities must be defined in a dict'
+error_user_string = 'Users must be a string literals'
+error_mixed_conf_lvl = 'Mixed confidentiality levels in collection'
+error_public_loop_secret_break = 'Trying to escape a public loop from a secret context'
+warning_unsupported_statement = 'Unsupported statement'
+warning_declassify_public = 'No need to declassify public variables'
+
 #
 # LABELING
 # 
@@ -77,7 +93,7 @@ def labelNode(node):
             if node.iter.id in var_labels:
                 var_labels[target.id] = var_labels[node.iter.id]
             else:
-                printe('Unknown variable {}'.format(node.iter.id), ln, col)
+                printe(error_unknown_variable.format(node.iter.id), ln, col)
         else:
             var_labels[target.id] = pif_public_label
         
@@ -91,7 +107,7 @@ def labelNode(node):
                     if get_node_type(a) == 'Str':
                         principals.add(a.s)
                     else:
-                        printe('Principals can only be string literals', ln, col)
+                        printe(error_principal_strings, ln, col)
                 
                 # Generate the public label
                 for p in principals:
@@ -102,16 +118,16 @@ def labelNode(node):
             elif c.func.id == 'authorities':
                 for a in c.args:
                     if len(principals) == 0:
-                        printe('Principals must be defined before authorities', ln, col)
+                        printe(error_principal_authorities, ln, col)
 
                     if get_node_type(a) == 'Str':
                         if a.s in principals:
                             authorities.add(a.s)
                         else:
-                            printe('Can\'t add authroity {} since it is not present in principals'.format(a.s), ln, col)
+                            printe(error_authorities_are_principals.format(a.s), ln, col)
 
                     else:
-                        printe('Authorities can only be string literals', ln, col)
+                        printe(error_authorities_strings, ln, col)
 
                 return None # Remove ast node form the real program
 
@@ -132,7 +148,7 @@ def doAnalysis(node, pc=None, lc=None, label=None):
 
     # Walk! the ast...
     if get_node_type(node) == 'Module':
-        node.body = [doAnalysis(n, pc, lc, label) for n in node.body]
+        node.body = flatten_list([doAnalysis(n, pc, lc, label) for n in node.body])
     else:
         node = analyseNode(node, pc, lc, label)[0]
 
@@ -157,6 +173,8 @@ def analyseNode(node, pc, lc, label):
         return (node, pc, lc, label) # Not handling timing attacks for now...
     elif t in ['Break', 'Continue']:
         return handleEscape(node, pc, lc, label, ln, col) # Not handling timing and non-termination attacks for now...
+    elif t == 'With':
+        return handleWith(node, pc, lc, label, ln, col)
 
     # expr
     elif t == 'Name':
@@ -199,7 +217,7 @@ def analyseNode(node, pc, lc, label):
         return handleSlice(node, pc, lc, label, ln, col) 
 
     # no handler defined for node, just return it
-    printw('Unsupported statement', ln, col)
+    printw(warning_unsupported_statement, ln, col)
     return (node, pc, lc, label)
 
 # Handling functions
@@ -214,7 +232,7 @@ def handleAssign(node, pc, lc, label, ln, col):
     target_level = get_variable_label(node.targets[0])
 
     if not is_upper_bound(get_least_upper_bound(current_level, expr_level), get_allowed_principals(target_level)):
-        printb("Confidentiality mismatch", ln, col)
+        printb(error_conf_mismatch, ln, col)
     
     return (node, pc, lc, label)
 
@@ -265,11 +283,11 @@ def handleIf(node, pc, lc, label, ln, col):
 
     body_labels_analysis = [analyseNode(x, pc, lc, label) for x in node.body]
     body_labels = get_labels(body_labels_analysis)
-    node.body = get_nodes(body_labels_analysis)
+    node.body = flatten_list(get_nodes(body_labels_analysis))
 
     orelse_label_analysis = [analyseNode(x, pc, lc, label) for x in node.orelse]
     orelse_labels = get_labels(orelse_label_analysis)
-    node.orelse = get_nodes(orelse_label_analysis)
+    node.orelse = flatten_list(get_nodes(orelse_label_analysis))
 
     body_level = get_least_upper_bound(body_labels)
     orelse_level = get_least_upper_bound(orelse_labels)
@@ -332,8 +350,8 @@ def handleFor(node, pc, lc, label, ln, col):
     
     pc.append(get_least_upper_bound(pc[-1], iter_ref_level))
 
-    node.body = [analyseNode(x, pc, lc, label)[0] for x in node.body]
-    node.orelse = [analyseNode(x, pc, lc, label)[0] for x in node.orelse]
+    node.body = flatten_list([analyseNode(x, pc, lc, label)[0] for x in node.body])
+    node.orelse = flatten_list([analyseNode(x, pc, lc, label)[0] for x in node.orelse])
 
     return (node, pc, lc, label)
 
@@ -349,9 +367,8 @@ def handleCall(node, pc, lc, label, ln, col):
 
     # Check if all args are public
     if func_name in ['print', 'exit']:
-        print(get_least_upper_bound(args_level, pc[-1]))
         if get_least_upper_bound(args_level, pc[-1]) != get_allowed_principals(pif_public_label):
-            printb('All arguments should be public', ln, col)
+            printb(error_public_arguments, ln, col)
     
     if func_name == 'declassify':
         node_analysis = handleDeclassify(node, pc, lc, label, ln, col)
@@ -367,10 +384,10 @@ def handleDeclassify(node, pc, lc, label, ln, col):
     node_analysis = analyseNode(new_node, pc, lc, label)
 
     if len(node.args) != 2:
-        printe('declassify needs a expr and a set of authorities as strings', ln, col)
+        printe(error_declassify_args, ln, col)
 
     if node_analysis[3] == pif_public_label:
-        printw('No need to declassify public variables', ln, col)
+        printw(warning_declassify_public, ln, col)
 
 
     auth_arg = node.args[1]
@@ -378,42 +395,9 @@ def handleDeclassify(node, pc, lc, label, ln, col):
 
     if auth_arg_type != 'Dict':
         # This exites the analysis
-        printe('Authorities must be defined in a dict', ln, col)
+        printe(error_authority_dict, ln, col)
     else:
-        new_label = {}
-
-        auth_arg_len = len(auth_arg.keys)
-
-        if auth_arg_len == 0:
-            new_label = pif_secret_label
-        else:
-            owners = auth_arg.keys
-            guestslist = auth_arg.values
-
-            for o, l in zip(owners, guestslist):
-                if get_node_type(o) == 'Str':
-                    
-                    if o.s == 'public':
-                        new_label = pif_public_label
-                        break
-
-                    guests = []
-
-                    for g in l.elts:
-                        if get_node_type(g) == 'Str':
-                                guests.append(g.s)
-                        else:
-                            printe('Users must be a string literals', ln, col)
-
-                    new_label[o.s] = guests
-                else:
-                    printe('Authorities must be a string literals', ln, col)
-
-        # TODO: should we check if the new label is less restrictive?
-        # And can we declassify to something that the original owners
-        # is not a part of?
-
-        label = new_label
+        label = parse_authority_set(node.args[1])
 
     return (new_node, pc, lc, label)
 
@@ -426,7 +410,7 @@ def handleList(node, pc, lc, label, ln, col):
     list_label = is_labels_same(item_levels)
 
     if list_label == None:
-        printb("Mixed confidentiality levels in collection", ln, col)
+        printb(error_mixed_conf_lvl, ln, col)
 
     return (node, pc, lc, pif_public_label)
 
@@ -481,11 +465,76 @@ def handleSlice(node, pc, lc, label, ln, col):
 
 def handleEscape(node, pc, lc, label, ln, col):
     if  lc[-1] != pc[-1] and is_upper_bound(lc[-1], pc[-1]):
-        printb('Trying to escape a public loop from a secret context', ln, col)
+        printb(error_public_loop_secret_break, ln, col)
+
+    return (node, pc, lc, label)
+
+def handleWith(node, pc, lc, label, ln, col):
+    wi = node.items[0]
+    expr = wi.context_expr 
+    var = wi.optional_vars
+
+    if get_node_type(var) == 'Name' and var.id == 'authority':
+
+        if get_node_type(expr) != 'Dict':
+            printe(error_authority_dict, ln, col)
+        else:
+            new_pc = parse_authority_set(expr)
+
+            pc.append(new_pc)
+
+            node_body_analysis = [analyseNode(n, pc, lc, label) for n in node.body]
+            node.body = flatten_list(get_nodes(node_body_analysis))
+
+            pc.pop()
+
+            return (node.body, pc, lc, label)
 
     return (node, pc, lc, label)
 
 # Analysis helping functions
+
+def flatten_list(l):
+    new_list = l
+    for i, item in enumerate(l):
+        if type(item) == list:
+            new_list[i:i+1] = item
+    return new_list
+
+def parse_authority_set(node):
+    new_label = pif_secret_label
+    auth_arg_len = len(node.keys)
+
+    if auth_arg_len == 0:
+        new_label = pif_secret_label
+    else:
+        owners = node.keys
+        guestslist = node.values
+
+        for o, l in zip(owners, guestslist):
+            if get_node_type(o) == 'Str':
+                
+                if o.s == 'public':
+                    new_label = pif_public_label
+                    break
+
+                guests = []
+
+                for g in l.elts:
+                    if get_node_type(g) == 'Str':
+                            guests.append(g.s)
+                    else:
+                        printe(error_user_string, ln, col)
+
+                new_label[o.s] = guests
+            else:
+                printe(error_authorities_strings, ln, col)
+
+        # TODO: should we check if the new label is less restrictive?
+        # And can we declassify to something that the original owners
+        # is not a part of?
+
+    return new_label
 
 def get_labels(l):
     return [x[3] for x in l]
@@ -544,7 +593,7 @@ def get_variable_label(node : ast.Name):
         return var_labels[node.id]
     except KeyError:
         ln, col = get_node_pos(node)
-        printe('Unknown variable {}'.format(node.id), ln, col)
+        printe(error_unknown_variable.format(node.id), ln, col)
 
 def get_node_type(node):
     return type(node).__name__
