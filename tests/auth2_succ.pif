@@ -1,0 +1,16 @@
+authorities(
+    'Alice',
+    'Bob',
+    'Ulrik'
+)
+
+expr = 42 # public!
+a = label(expr, {'Alice': ['Ulrik']}) # Alice owns and gives Ulrik rw
+b = label(expr, {'Bob': ['Alice']}) # Bob owns and gives Alice rw
+
+while declassify(a, 'public') > 0:
+    a = a - 1
+    b = declassify(a, 'public')
+
+print(declassify(a, 'public'))
+print(declassify(b, 'public'))

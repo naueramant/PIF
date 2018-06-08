@@ -10,6 +10,7 @@ pif_public_label = 0
 
 var_labels = {}
 collection_element_labels = {}
+authorities = set()
 
 #
 # LABELING
@@ -17,9 +18,10 @@ collection_element_labels = {}
 
 def doLabeling(node):
     if get_node_type(node) == 'Module':
-        [doLabeling(n) for n in node.body]
+        node.body = list(filter(None.__ne__, [doLabeling(n) for n in node.body]))
+        return node
     else:
-        labelNode(node)
+        return labelNode(node)
 
 def labelNode(node):
     t = get_node_type(node)
@@ -52,13 +54,30 @@ def labelNode(node):
             label = pif_secret_label
 
         var_labels[target.id] = label
+
+    elif t == 'Expr':
+        if get_node_type(node.value) == 'Call':
+            c = node.value
+            if c.func.id == 'authorities':
+                for a in c.args:
+                    if get_node_type(a) == 'Str':
+                        authorities.add(a.s)
+                    else:
+                        printe('Authorities can only be string literals')
+
+                return None # Remove ast node form the real program
+
+    return node
+
 #
 # ANALYSIS
 # 
 
 def doAnalysis(node, pc=None, lc=None, label=None):
     # generate the labels
-    doLabeling(node)
+    node = doLabeling(node)
+
+    print(authorities)
 
     # default values
     if not pc:
