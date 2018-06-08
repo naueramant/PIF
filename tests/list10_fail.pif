@@ -1,0 +1,16 @@
+principals(
+    'Alice',
+    'Bob',
+    'Charlie'
+)
+
+authorities(
+    'Alice',
+    'Bob',
+    'Charlie'
+)
+
+a = label(1, {'Alice': []})
+b = label(2, {'Bob': []})
+c = label(3, {'Charlie': []})
+d = [a, b, c]

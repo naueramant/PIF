@@ -1,5 +1,6 @@
 import astor, ast, sys, os
 from termcolor import colored
+import argparse
 
 # Global prefs
 
@@ -9,6 +10,8 @@ pif_public_label = {}
 supported_iterables = ['Str', 'List', 'Tuple', 'Set']
 
 # Data
+
+source = None
 
 var_labels = {}
 collection_element_labels = {}
@@ -605,9 +608,6 @@ def get_node_pos(node):
 
 # Other helping functions
 
-def load_ast(file):
-    return astor.code_to_ast.parse_file(file)
-
 def printw(msg, ln, col):
     print(colored('PIF WARNING 😐 ln {} col {}:'.format(ln, col), 'yellow'))
     print('Msg: ', msg)
@@ -626,17 +626,53 @@ def printe(msg, ln, col):
     exit(-1)
 
 def get_source_at(ln, col):
+    global source
+
+    if source == None:
+        source = open(args.file).readlines()
+    
     return source[ln-1].replace('\n', '')
 
 # Main
 
 if __name__ == '__main__':
-    main_ast = load_ast(sys.argv[1])
-    source = open(sys.argv[1]).readlines()
+
+    # Parameters
+
+    parser = argparse.ArgumentParser(description='Static Information Flow Analysis for python')
+
+    parser.add_argument('file', help='pif file')
+    parser.add_argument('-a', '--analyse', help='Analyse code but do not execute', action='store_true')
+    parser.add_argument('-e', '--export', help='Analyse and export the code', action='store_true')
+    parser.add_argument('-o', '--output', help='Define output file for export')
+
+    args = parser.parse_args()
+
+    # Analysis
+
+    try:
+        main_ast =  astor.code_to_ast.parse_file(args.file)
+    except:
+        print(colored('error:', 'red'), 'No such file \'{}\''.format(args.file))
+        exit(-1)
 
     labeled_ast = doLabeling(main_ast)
     new_ast = doAnalysis(labeled_ast)
-    new_source = astor.to_source(new_ast)
 
-    exec(new_source)
+    new_source = astor.to_source(new_ast)
+    
+    if args.export:
+        if args.output:
+            with open(args.output, 'w') as f:
+                f.write(new_source)
+        else:
+            print(new_source)
+    else:
+        if args.output:
+            print(colored('error:', 'red'), 'Can\'t export to file \'{}\' without export flag'.format(args.file))
+            exit(-1)
+
+        if not args.analyse:
+            exec(new_source)
+        
     
