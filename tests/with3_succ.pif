@@ -1,0 +1,18 @@
+principals(
+    'Alice',
+    'Bob',
+    'Ulrik'
+)
+
+authorities(
+    'Alice',
+    'Bob',
+    'Ulrik'
+)
+
+a = label(10, {'Alice': []})
+b = label(20, {'Bob': []})
+
+if a > 0:
+    with {'Ulrik': []} as authority:
+        b = declassify(a, {'Bob': []})

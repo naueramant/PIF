@@ -1,0 +1,13 @@
+#should give warning
+principals(
+    'Alice',
+    'Bob'
+)
+
+authorities(
+    'Alice',
+    'Bob'
+)
+
+a = 1
+b = declassify(a, {'MrWrong': []})

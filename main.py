@@ -234,7 +234,10 @@ def handleAssign(node, pc, lc, label, ln, col):
     node.value = node_analysis[0]
     target_level = get_variable_label(node.targets[0])
 
-    if not is_upper_bound(get_least_upper_bound(current_level, expr_level), get_allowed_principals(target_level)):
+    least_upper = get_least_upper_bound(current_level, expr_level)
+    allowed_principals = get_allowed_principals(target_level)
+
+    if not is_upper_bound(least_upper, allowed_principals) or (least_upper & allowed_principals) != allowed_principals:
         printb(error_conf_mismatch, ln, col)
     
     return (node, pc, lc, label)

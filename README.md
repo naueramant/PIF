@@ -3,7 +3,7 @@
 Pif is an extension to a subset of the Python language which implements information flow control.
 
 ## Setup
-This project requires python3 and uses a `pipenv`. For the rest of this readme we consider `python = python3`, substitute as necessary. In order to activate it, simply run:
+This project requires python3 and uses a `pipenv`. For the rest of this project we consider `python = python3`, substitute as necessary. In order to activate it, simply run:
 ```bash
 $ pipenv install
 $ pipenv shell
