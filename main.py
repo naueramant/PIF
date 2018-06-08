@@ -1,6 +1,7 @@
 import astor, ast, sys, os
 from termcolor import colored
 import argparse
+from copy import deepcopy
 
 # Global prefs
 
@@ -89,7 +90,6 @@ def labelNode(node):
         # TODO: Support dicts
 
     elif t == 'For':
-        label = pif_public_label
         target = node.target
 
         if get_node_type(node.iter) == 'Name':
@@ -411,6 +411,8 @@ def handleDeclassify(node, pc, lc, label, ln, col):
     else:
         label = parse_authority_set(node.args[1])
 
+    print(label)
+
     return (new_node, pc, lc, label)
 
 def handleList(node, pc, lc, label, ln, col):
@@ -514,9 +516,9 @@ def flatten_list(l):
     return new_list
 
 def parse_authority_set(node):
-    new_label = pif_secret_label
+    new_label = deepcopy(pif_secret_label) # weird pif_secret_label override fix...
     auth_arg_len = len(node.keys)
-
+    
     if auth_arg_len == 0:
         new_label = pif_secret_label
     else:
@@ -524,6 +526,7 @@ def parse_authority_set(node):
         guestslist = node.values
 
         for o, l in zip(owners, guestslist):
+
             if get_node_type(o) == 'Str':
                 
                 if o.s == 'public':
@@ -538,7 +541,7 @@ def parse_authority_set(node):
                     else:
                         printe(error_user_string, ln, col)
 
-                new_label[o.s] = guests
+                new_label[o.s] = guests # deepcopy is because of this...
             else:
                 printe(error_authorities_strings, ln, col)
 
