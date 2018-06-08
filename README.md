@@ -44,3 +44,4 @@ In Pif variables are either `public` or `secret`. The naming of variables is imp
 * Public: `c`
 
 Values of `private` variables cannot be written to `public` variables and the value of `public` variables cannot depend on the value of `private` variables, as this leaks information.
+
