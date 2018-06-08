@@ -361,13 +361,46 @@ def handleCall(node, pc, lc, label, ln, col):
     # result of function is the same as least upper bound of the given args
     return (node, pc, lc, args_level)
 
+# Declassify is not robust!
 def handleDeclassify(node, pc, lc, label, ln, col):
-    node = node.args[0]
+    print(node)
+    new_node = node.args[0]
+    node_analysis = analyseNode(new_node, pc, lc, label)
 
-    if analyseNode(node, pc, lc, label)[3] == pif_public_label:
+    if len(node.args) != 2:
+        printe('declassify needs a expr and a set of authorities as strings', ln, col)
+
+    if node_analysis[3] == pif_public_label:
         printw('No need to declassify public variables', ln, col)
 
-    return (node, pc, lc, pif_public_label)
+
+    auth_arg = node.args[1]
+    auth_arg_type = get_node_type(auth_arg)
+
+    if auth_arg_type != 'Set':
+        # This exites the analysis
+        printe('Authorities must be defined in a set', ln, col)
+    else:
+        new_label = {}
+
+        auth_arg_len = len(auth_arg.elts)
+
+        if auth_arg_len == 0:
+            new_label = pif_secret_label
+        else:
+            for s in auth_arg.elts:
+                if get_node_type(s) == 'Str':
+                    if s.s == 'public':
+                        new_label = pif_public_label
+                        break
+
+                    new_label[s.s] = []
+                else:
+                    printe('Authorities must be a string literals', ln, col)
+
+        label = new_label
+
+    return (new_node, pc, lc, label)
 
 def handleList(node, pc, lc, label, ln, col):
     item_levels_analysis = [analyseNode(x, pc, lc, label) for x in node.elts]

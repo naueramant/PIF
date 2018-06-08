@@ -10,4 +10,4 @@ authorities(
 )
 
 a = 1
-b = declassify(a)
+b = declassify(a, {'public'})
