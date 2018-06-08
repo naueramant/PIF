@@ -1,5 +1,18 @@
-authorities(
+principals(
     'Alice',
     'Bob',
     'Ulrik'
 )
+
+authorities(
+    'Bob',
+    'Ulrik'
+)
+
+a = label(42, {'Bob': ['Alice']})
+b = label(0, {'Alice': []})
+s = label(0, {})
+
+if a > 0:
+    if b == 0:
+        b = a + 1
