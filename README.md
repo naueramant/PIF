@@ -12,7 +12,12 @@ $ pipenv shell
 ## Usage
 In order to run a Pif file simply pass it to `main.py` like this:
 ```bash
-$ python main.py ./tests/assign1_succ.pif
+$ ./pif ./tests/assign1_succ.pif
+```
+
+For available arguments see help: 
+```bash
+$ ./pif -h
 ```
 
 ## Testing
@@ -32,12 +37,13 @@ In Pif the following Python3 features are handled:
 * If statements, `if b = 2:`, `if a:`, etc.
 * While loops, `while 0 < 1:`, `while a <= b:`, etc.
 * For loops, `for b in a:`, `for b in [1,2,3]:`, etc.
+* Loop escapes, `continue` and `break`.
 * Pass statements, `pass`.
 * Lists, `['0', '1', '2']`, etc.
 * Tuples, `('0', '1', '2')`, etc.
 * Set, `{'0', '1', '2'}`, etc.
 * Subscript, `[1,2,3][2:]`, `[1,2,3][:2]`, `[1,2,3][2:2]`, etc.
-* Function calls, `print('Hello World!')`, `exit(-1)`, etc.
+* Function calls, `print('Hello World!')`, `exit(-1)`, `input()`, etc.
 * Declassification, `declassify(a, {'Bob': [], 'Alice': []})`, `declassify(a, {'public': []})`, etc.
 * With authority statements, `with {'public': []} as authority:`, `with {'Alice': []} as authority:`, etc. 
 * More incoming...
