@@ -637,7 +637,7 @@ def get_source_at(ln, col):
     if source == None:
         source = open(args.file).readlines()
     
-    return source[ln-1].replace('\n', '')
+    return source[ln-1].replace('\n', '').lstrip()
 
 # Main
 
