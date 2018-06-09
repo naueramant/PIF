@@ -545,9 +545,9 @@ def parse_authority_set(node):
             else:
                 printe(error_authorities_strings, ln, col)
 
-        # TODO: should we check if the new label is less restrictive?
+        # TODO: should we check if the new label is less restrictive? YES
         # And can we declassify to something that the original owners
-        # is not a part of?
+        # is not a part of? NO
 
     return new_label
 
@@ -571,7 +571,7 @@ def is_labels_same(l):
 
 # l2 upperbound of l1
 def is_upper_bound(l1, l2):
-    return sorted(list(l1)) == sorted(list(l2)) or len(l2) < len(l1)
+    return sorted(list(l1)) == sorted(list(l2)) or (len(l2) < len(l1) and l2 & l1 == l2)
 
 def get_least_upper_bound(l1, l2=None):
     res = principals
