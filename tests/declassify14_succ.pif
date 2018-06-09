@@ -1,3 +1,4 @@
+# Example of fixing print2_fail.pif
 principals(
     'Alice',
     'Bob'

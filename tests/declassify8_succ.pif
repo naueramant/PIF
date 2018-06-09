@@ -1,3 +1,4 @@
+# Example of fixing compare2_fail.pif
 principals(
     'Alice',
     'Bob'
@@ -9,8 +10,4 @@ authorities(
 )
 
 a = label(2, {'Alice': []})
-b = 1
-
-if b:
-    if declassify(a, {'public': []}) > 1:
-        b = 3
+b = 1 > 4 > 3 > 42 > 333 > declassify(a, {'public': []})

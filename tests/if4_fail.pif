@@ -11,6 +11,6 @@ authorities(
 a = label(1, {'Alice': []})
 b = 2
 
-if a:
-    if b > 1:
+if b:
+    if a > 1:
         b = 3
