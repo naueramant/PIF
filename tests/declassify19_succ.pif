@@ -1,0 +1,8 @@
+principals('Alice', 'Bob')
+authorities('Alice')
+
+a = label('Alice\'s string', {'Alice': []})
+
+# Make a public by including Bob
+p = declassify(a, {'Alice': ['Bob']})
+print(p)
