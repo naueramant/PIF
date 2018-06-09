@@ -30,7 +30,7 @@ error_authorities_strings = 'Authorities can only be string literals'
 error_conf_mismatch = 'Confidentiality mismatch'
 error_public_arguments = 'All arguments should be public'
 error_declassify_args = 'declassify() needs a expr and a set of authorities as strings'
-error_authority_dict = 'Authorities must be defined in a dict'
+error_authority_set = 'Authorities must be defined in a set'
 error_not_an_authority = '{} has not authoritiesed this process'
 error_user_string = 'Users must be a string literals'
 error_mixed_conf_lvl = 'Mixed confidentiality levels in collection'
@@ -180,8 +180,6 @@ def analyseNode(node, pc, lc, label):
         return (node, pc, lc, label) # Not handling timing attacks for now...
     elif t in ['Break', 'Continue']:
         return handleEscape(node, pc, lc, label, ln, col) # Not handling timing and non-termination attacks for now...
-    elif t == 'With':
-        return handleWith(node, pc, lc, label, ln, col)
 
     # expr
     elif t == 'Name':
@@ -505,31 +503,6 @@ def handleSlice(node, pc, lc, label, ln, col):
 def handleEscape(node, pc, lc, label, ln, col):
     if  lc[-1] != pc[-1] and is_upper_bound(lc[-1], pc[-1]):
         printb(error_public_loop_secret_break, ln, col)
-
-    return (node, pc, lc, label)
-
-def handleWith(node, pc, lc, label, ln, col):
-    wi = node.items[0]
-    expr = wi.context_expr 
-    var = wi.optional_vars
-
-    if get_node_type(var) == 'Name' and var.id == 'authority':
-
-        if get_node_type(expr) != 'Dict':
-            printe(error_authority_dict, ln, col)
-        else:
-            new_pc = parse_authority_set(expr)
-
-            # 
-
-            pc.append(new_pc)
-
-            node_body_analysis = [analyseNode(n, pc, lc, label) for n in node.body]
-            node.body = flatten_list(get_nodes(node_body_analysis))
-
-            pc.pop()
-
-            return (node.body, pc, lc, label)
 
     return (node, pc, lc, label)
 
