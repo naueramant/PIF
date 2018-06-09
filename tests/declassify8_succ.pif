@@ -1,3 +1,4 @@
+# Example of fixing boolop3_fail.pif
 principals(
     'Alice',
     'Bob'
@@ -10,4 +11,4 @@ authorities(
 
 a = label(True, {'Alice': []})
 
-b = declassify(a, {'Alice': ['Bob']}) and True
+b = declassify(a, {'Alice': ['Bob']}) or True
