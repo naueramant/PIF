@@ -9,4 +9,4 @@ authorities(
 )
 
 a = label(True, {'Alice': []})
-b = 1 if declassify(a, {'public': []}) else 2
+b = 1 if declassify(a, {'Alice': ['Bob']}) else 2

@@ -9,4 +9,4 @@ authorities(
 )
 
 a = label("Hej", {'Alice': []})
-print(declassify(a, {'public': []}))
+print(declassify(a, {'Alice': ['Bob']}))

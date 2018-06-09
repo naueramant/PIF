@@ -9,4 +9,4 @@ authorities(
 )
 
 a = label(2, {'Alice': []})
-b = 1 > 4 > 3 > 42 > 333 > declassify(a, {'public': []})
+b = 1 > 4 > 3 > 42 > 333 > declassify(a, {'Alice': ['Bob']})

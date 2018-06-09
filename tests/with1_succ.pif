@@ -12,5 +12,5 @@ a = label(10, {'Alice': []})
 b = label(20, {'Bob': []})
 
 if a > 0:
-    with {'public': []} as authority:
+    with {'Bob': []} as authority:
         b = 2

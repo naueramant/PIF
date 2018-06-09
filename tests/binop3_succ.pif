@@ -12,4 +12,4 @@ a = label(1, {'Alice': ['Bob']})
 c = 0
 b = 1
 
-c = declassify(a, {'public': []}) + b
+c = declassify(a, {'Alice': ['Bob']}) + b

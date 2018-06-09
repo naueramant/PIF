@@ -15,4 +15,4 @@ b = label(20, {'Bob': []})
 
 if a > 0:
     with {'Bob': []} as authority:
-        b = declassify(a, {'Bob': []})
+        b = declassify(a, {'Alice': ['Bob']})

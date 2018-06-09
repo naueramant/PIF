@@ -9,4 +9,4 @@ authorities(
 )
 
 a = label(0, {'Alice': []})
-exit(declassify(a, {'public': []}))
+exit(declassify(a, {'Alice': ['Bob']}))

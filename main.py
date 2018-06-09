@@ -21,18 +21,22 @@ authorities = set()
 principals = set()
 
 # Errors and warnings
-error_unknown_variable = 'Unknown variable {}'
+error_unknown_variable = 'Unknown variable \'{}\''
 error_principal_strings = 'Principals can only be string literals'
+error_principal_does_not_exist = 'Principal \'{}\' does\'t exist'
 error_principal_authorities = 'Principals must be defined before authorities'
-error_authorities_are_principals = 'Can\'t add authroity {} since it is not present in principals'
+error_authorities_are_principals = 'Can\'t add authroity \'{}\' since it is not present in principals'
 error_authorities_strings = 'Authorities can only be string literals'
 error_conf_mismatch = 'Confidentiality mismatch'
 error_public_arguments = 'All arguments should be public'
 error_declassify_args = 'declassify() needs a expr and a set of authorities as strings'
 error_authority_dict = 'Authorities must be defined in a dict'
+error_not_an_authority = '{} has not authoritiesed this process'
 error_user_string = 'Users must be a string literals'
 error_mixed_conf_lvl = 'Mixed confidentiality levels in collection'
 error_public_loop_secret_break = 'Trying to escape a public loop from a secret context'
+error_does_not_own_data = '{} does not own this data'
+error_no_upgrades = 'Can\'t upgrade with declassify'
 warning_unsupported_statement = 'Unsupported statement'
 warning_declassify_public = 'No need to declassify public variables'
 
@@ -401,7 +405,6 @@ def handleDeclassify(node, pc, lc, label, ln, col):
     if node_analysis[3] == pif_public_label:
         printw(warning_declassify_public, ln, col)
 
-
     auth_arg = node.args[1]
     auth_arg_type = get_node_type(auth_arg)
 
@@ -411,7 +414,29 @@ def handleDeclassify(node, pc, lc, label, ln, col):
     else:
         label = parse_authority_set(node.args[1])
 
-    print(label)
+        # Does owners exist in this process
+        # All owners are still auth
+        original_owners = node_analysis[3].keys()
+
+        target_level = node_analysis[3]
+
+        for owner, guestlist in zip(label.keys(), label.values()):
+            # Check if original labels
+            if owner not in original_owners:
+                printe(error_does_not_own_data.format(owner), ln, col)
+            
+            # Check if authority
+            if owner not in authorities:
+                printe(error_not_an_authority.format(owner), ln, col)
+
+            # Check if less or as restrictive
+            if not is_upper_bound(guestlist, target_level[owner]):
+                printe(error_no_upgrades, ln, col)
+
+            # check if guests is in principals
+            for guest in guestlist:
+                if guest not in principals:
+                    printe(error_principal_does_not_exist.format(guest), ln, col)
 
     return (new_node, pc, lc, label)
 
@@ -495,6 +520,8 @@ def handleWith(node, pc, lc, label, ln, col):
         else:
             new_pc = parse_authority_set(expr)
 
+            # 
+
             pc.append(new_pc)
 
             node_body_analysis = [analyseNode(n, pc, lc, label) for n in node.body]
@@ -528,10 +555,6 @@ def parse_authority_set(node):
         for o, l in zip(owners, guestslist):
 
             if get_node_type(o) == 'Str':
-                
-                if o.s == 'public':
-                    new_label = pif_public_label
-                    break
 
                 guests = []
 
@@ -544,10 +567,6 @@ def parse_authority_set(node):
                 new_label[o.s] = guests # deepcopy is because of this...
             else:
                 printe(error_authorities_strings, ln, col)
-
-        # TODO: should we check if the new label is less restrictive?
-        # And can we declassify to something that the original owners
-        # is not a part of?
 
     return new_label
 

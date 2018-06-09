@@ -1,6 +1,7 @@
 principals(
     'Alice',
-    'Bob'
+    'Bob',
+    'Ulrik'
 )
 
 authorities(
@@ -9,5 +10,5 @@ authorities(
 )
 
 a = label('test', {'Alice': []})
-ab = label('', {'Alice': [], 'Bob': []})
-ab = declassify(a, {'Bob': [], 'Alice': []})
+b = label('test', {'Bob': ['Alice']})
+b = declassify(a, {'Alice': ['Bob']})

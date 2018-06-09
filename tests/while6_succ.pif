@@ -12,5 +12,5 @@ a = label('test', {'Alice': []})
 b = 1
 
 while b == 1:
-    print(declassify(a, {'public': []}))
+    print(declassify(a, {'Alice': ['Bob']}))
     b = 2

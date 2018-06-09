@@ -11,7 +11,7 @@ authorities(
 a = 42
 b = label(100, {'Alice': []})
 
-c = declassify(b, {'public': []})
+c = declassify(b, {'Alice': ['Bob']})
 
 for i in list(range(c)):
     a = a + 1

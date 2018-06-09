@@ -11,7 +11,7 @@ authorities(
 a = label(42, {'Alice': []})
 b = 0
 
-while b < declassify(a, {'public': []}):
+while b < declassify(a, {'Alice': ['Bob']}):
     if b / 7 == 0:
         b = b + 40
     elif b / 10 == 2:
