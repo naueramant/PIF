@@ -590,7 +590,9 @@ def is_labels_same(l):
 
 # l2 upperbound of l1
 def is_upper_bound(l1, l2):
-    return sorted(list(l1)) == sorted(list(l2)) or len(l2) < len(l1)
+    l1 = set(l1)
+    l2 = set(l2)
+    return l1 == l2 or (len(l2) < len(l1) and l2 & l1 == l2)
 
 def get_least_upper_bound(l1, l2=None):
     res = principals
