@@ -121,15 +121,8 @@ module Python
 ## Examples
 
 ```python
-principals(
-    'Alice',
-    'Bob'
-)
-
-authorities(
-    'Alice',
-    'Bob'
-)
+principals('Alice', 'Bob')
+authorities('Alice', 'Bob')
 
 a = label(1, {'Alice': []})
 b = label(2, {'Alice': []})
@@ -138,30 +131,16 @@ d = [a, b, c]
 ```
 
 ```python
-principals(
-    'Alice',
-    'Bob'
-)
-
-authorities(
-    'Alice',
-    'Bob'
-)
+principals('Alice', 'Bob')
+authorities('Alice', 'Bob')
 
 a = label(not True, {'Alice': ['Bob']})
 b = declassify(a, {'public': []})
 ```
 
 ```python
-principals(
-    'Alice',
-    'Bob'
-)
-
-authorities(
-    'Alice',
-    'Bob'
-)
+principals('Alice', 'Bob')
+authorities('Alice', 'Bob')
 
 a = label(10, {'Alice': []})
 b = label(20, {'Bob': []})
@@ -169,7 +148,6 @@ b = label(20, {'Bob': []})
 if a > 0:
     with {'public': []} as authority:
         b = 2
-
 ```
 
 More examples of both correct and incorrect pif-code can be found in the `./tests/` directory.
