@@ -2,6 +2,14 @@
 
 Pif is an extension to a subset of the Python language which implements information flow control.
 
+## Install
+
+To install pif globally on the system run:
+
+```bash
+$ sudo setup.py install
+```
+
 ## Setup
 This project requires python3 and uses a `pipenv`. For the rest of this project we consider `python = python3`, substitute as necessary. In order to activate it, simply run:
 ```bash
@@ -10,7 +18,7 @@ $ pipenv shell
 ```
 
 ## Usage
-In order to run a Pif file simply pass it to `main.py` like this:
+In order to run a Pif file simply pass it to `./pif` like this:
 ```bash
 $ ./pif ./tests/assign1_succ.pif
 ```
@@ -166,4 +174,6 @@ if a > 0:
 
 More examples of both correct and incorrect pif-code can be found in the `./tests/` directory.
 
-©️ David Zachariae, Jonas Tranberg Sørensen and Ulrik Boll Djurtoft
+## Authors
+
+David Zachariae, Jonas Tranberg Sørensen and Ulrik Boll Djurtoft
