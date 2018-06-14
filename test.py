@@ -17,7 +17,7 @@ try:
     for test in tests:
         test_path = './tests/' + test
         print(test, end='')
-        exit_code = call(['python', 'main.py', test_path], stdout=open(devnull, "w"))
+        exit_code = call(['./pif', test_path], stdout=open(devnull, "w"))
         if test.endswith('_succ.pif'):
             if exit_code == 0:
                 succesfull_tests.append(test)

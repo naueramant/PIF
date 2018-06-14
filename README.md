@@ -58,6 +58,58 @@ Values of restricted variables cannot be written to variables of a looser restri
 
 In lists, sets and touples, the collection itself can have a different owner than the content, however all the content must be owned by the same principal.
 
+## Subset of python supported
+
+```
+module Python
+{
+    mod = Module(stmt* body)
+    
+    stmt = 
+    	| Expr(expr value)
+    	| Assign(expr* targets, expr value)
+        | Print(expr? dest, expr* values, bool nl)
+    	| Compare(expr left, cmpop* ops, expr* comparators)
+        | If(expr test, stmt* body, stmt* orelse)
+        | While(expr test, stmt* body, stmt* orelse)
+        | For(expr target, expr iter, stmt* body, stmt* orelse)
+    	| Pass 
+    	| Break 
+    	| Continue
+    
+    expr =  
+        | Name(identifier id, expr_context ctx)
+        | NameConstant(singleton value)
+    	| Num(object n)
+    	| Str(string s) 
+        | BoolOp(boolop op, expr* values)
+    	| BinOp(expr left, operator op, expr right)
+    	| Compare(expr left, cmpop* ops, expr* comparators)
+        | Call(expr func, expr* args, keyword* keywords)
+    	| UnaryOp(unaryop op, expr operand)
+    	| IfExp(expr test, expr body, expr orelse)
+        | Tuple(expr* elts, expr_context ctx)
+        | List(expr* elts, expr_context ctx) 
+    	| Set(expr* elts)
+       	| Subscript(expr value, slice slice, expr_context ctx)
+    
+    slice = 
+          Slice(expr? lower, expr? upper, expr? step)
+        | ExtSlice(slice* dims)
+        | Index(expr value)
+    
+    boolop = And | Or 
+    
+    operator = Add | Sub | Mult | Div | Mod | Pow
+    
+    unaryop = Invert | Not | UAdd | USub
+    
+    cmpop = Eq | NotEq | Lt | LtE | Gt | GtE | Is | IsNot | In | NotIn
+    
+    keyword = (identifier? arg, expr value)
+}
+```
+
 ## Examples
 
 ```python
