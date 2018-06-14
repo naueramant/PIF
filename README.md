@@ -53,7 +53,6 @@ In Pif the following Python3 features are handled:
 * Subscript, `[1,2,3][2:]`, `[1,2,3][:2]`, `[1,2,3][2:2]`, etc.
 * Function calls, `print('Hello World!')`, `exit(-1)`, `input()`, etc.
 * Declassification, `declassify(a, {'Bob': [], 'Alice': []})`, `declassify(a, {'public': []})`, etc.
-* With authority statements, `with {'public': []} as authority:`, `with {'Alice': []} as authority:`, etc. 
 * More incoming...
 
 In Pif programs use `principals` and `authorities`. In the beginning of each program any `principal` used must be declared. The `authorities` of the current program must be a subset of `principals`. `principals` and `authorities` are used whenever one needs to label a variable or `declassify()` it, or is in a `with` block with a changed authority. If variables are unlabeled, they are `public`. For instance:
