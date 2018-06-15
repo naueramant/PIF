@@ -1,4 +1,10 @@
-# Pif - <span style="color:#fff000">P</span>ython + <span style="color:#fff000">i</span>nformation <span style="color:#fff000">f</span>low
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/naueramant/PIF/master/logo.png" alt="drawing" width="200px"/> <br/>
+<span style="color:#fff000">P</span>ython + <span style="color:#fff000">i</span>nformation <span style="color:#fff000">f</span>low
+</p>
+
+----
 
 Pif is an extension to a subset of the Python language which implements information flow control.
 
