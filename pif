@@ -32,7 +32,7 @@ error_authorities_strings = 'Authorities can only be string literals'
 error_conf_mismatch = 'Confidentiality mismatch'
 error_public_arguments = 'All arguments should be public'
 error_declassify_args = 'declassify() needs a expr and a set of authorities as strings'
-error_authority_set = 'Authorities must be defined in a set'
+error_authority_dict = 'Authorities must be defined in a dict'
 error_not_an_authority = '{} has not authoritiesed this process'
 error_user_string = 'Users must be a string literals'
 error_mixed_conf_lvl = 'Mixed confidentiality levels in collection'
@@ -520,6 +520,8 @@ def flatten_list(l):
 def parse_authority_set(node):
     new_label = deepcopy(pif_secret_label) # weird pif_secret_label override fix...
     auth_arg_len = len(node.keys)
+
+    ln, col = get_node_pos(node)    
     
     if auth_arg_len == 0:
         new_label = pif_secret_label
