@@ -8,6 +8,8 @@
 
 Pif is an extension to a subset of the Python language which implements information flow control.
 
+OBS: This framework is a scientific experiment and we do not recommend using it in production.
+
 ## Install
 
 To install pif globally on the system run:
